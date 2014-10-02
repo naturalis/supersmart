@@ -366,7 +366,16 @@ Full-Width Styles
   background: #212121;
 }
 
-
+#logo {
+  padding: 0px;
+  margin: 0px;
+  border-style: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
+}
 
 /*******************************************************************************
 Small Device Styles
