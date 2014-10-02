@@ -286,11 +286,11 @@ Full-Width Styles
 
 #header_wrap {
   background: #212121;
-  background: -moz-linear-gradient(top, #373737, #212121);
-  background: -webkit-linear-gradient(top, #373737, #212121);
-  background: -ms-linear-gradient(top, #373737, #212121);
-  background: -o-linear-gradient(top, #373737, #212121);
-  background: linear-gradient(top, #373737, #212121);
+  background: -moz-linear-gradient(top, white, white);
+  background: -webkit-linear-gradient(top, white, white);
+  background: -ms-linear-gradient(top, white, white);
+  background: -o-linear-gradient(top, white, white);
+  background: linear-gradient(top, white, white);
 }
 
 #header_wrap .inner {
@@ -375,6 +375,24 @@ img.clean {
   -moz-box-shadow: none;
   -o-box-shadow: none;
   -ms-box-shadow: none;
+}
+
+ul#navbar {
+/*  background-color: #bdd576;
+  border-radius: 20px; */
+  padding: 20px;
+/*  box-shadow: 0 0 10px rgba(0,0,0,.5); */
+  list-style: none;  
+  width: 120px;
+  font-weight: 700;
+  margin-top: 50px;
+  position: fixed;
+  right: 50%;
+  margin-right: 370px;
+}
+
+h1.section {
+  padding-top: 50px;
 }
 
 /*******************************************************************************
