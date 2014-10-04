@@ -254,6 +254,10 @@ form {
   padding: 20px;
 }
 
+small {
+	font-size: 70%;
+}
+
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
@@ -377,13 +381,16 @@ img.clean {
   -ms-box-shadow: none;
 }
 
-ul#navbar {
-/*  background-color: #bdd576;
-  border-radius: 20px; */
+img.inline {
+  display: inline;
+  float: left;
+/*  margin-right: 10px; */
+}
+
+#navbar {
   padding: 20px;
-/*  box-shadow: 0 0 10px rgba(0,0,0,.5); */
-  list-style: none;  
-  width: 120px;
+  list-style: none;
+  width: 150px;
   font-weight: 700;
   margin-top: 50px;
   position: fixed;
@@ -391,8 +398,16 @@ ul#navbar {
   margin-right: 370px;
 }
 
-h1.section {
+#navbar ul {
+  list-style: none;
+}
+
+h2.section {
   padding-top: 50px;
+}
+
+h3 {
+  padding-top: 30px;
 }
 
 /*******************************************************************************

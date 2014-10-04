@@ -5,14 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="SUPERSMART : Self-Updating Platform for the Estimation of Rates of Speciation, Migration And Relationships of Taxa" />
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css" />
-    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="javascripts/jquery.js"></script>
+    <script type="text/javascript" src="javascripts/main.js"></script>    
     <title>SUPERSMART</title>
   </head>
   <body>
 
 	<!-- NAVIGATION -->
-	<ul id="navbar">
+	<div id="navbar">
+	<ul>
 	  <li><a href="#intro" class="scrollable">Introduction</a></li>
 	  <li><a href="#install" class="scrollable">Install</a></li>
 	  <li><a href="#run" class="scrollable">Running</a></li>
@@ -20,6 +21,7 @@
 	  <li><a href="#people" class="scrollable">People</a></li>
 	  <li><a href="#resources" class="scrollable">Resources</a></li>
 	</ul>
+	</div>
 
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
@@ -43,43 +45,135 @@
       <section id="main_content" class="inner">
 
       <!-- intro section -->
-      <h1 id="intro" class="section"><a name="intro"></a>Introduction</h1>
+      <h2 id="intro" class="section"><a name="intro"></a>Introduction</h2>
       <p>
       	The self-updating platform for estimating rates of speciation and migration,
-      	ages and relationships of taxa (SUPERSMART) is a self-contained analytical 
-      	environment for large-scale phylogenetic data mining, data integration, tree
-      	inference and tree calibration.
+      	ages and relationships of taxa (SUPERSMART) is a self-contained, 
+      	<a href="#install" class="scrollable">easy to install</a> analytical 
+      	environment for large-scale phylogenetic data mining, taxonomic name resolution, 
+      	tree inference and fossil-based tree calibration.
       </p>
       <img src="images/Fig_2_Approach-comparison.png" class="clean" width="640" height="530" alt="comparison" />
+      <p>
+      	Unlike supertree and supermatrix approaches, SUPERSMART decomposes the tree 
+      	searching problem into subproblems so that complicated recent divergences can 
+      	be reconstructed using the current state-of-the-art (the multispecies, multilocus
+      	coalescent), while retaining the ability to build very large, composite estimates
+      	of phylogeny with branch lengths proportional to time.
+      </p>
       
       <!-- install section -->
-      <h1 id="install" class="section"><a name="install"></a>Installation</h1>
+      <h2 id="install" class="section"><a name="install"></a>Installation</h2>
+      <p>
+      	We have made every effort to make installation of SUPERSMART as simple as possible
+      	on as many different computers as possible. The three, easy steps described below are 
+      	known to work on the majority of modern computers with recent versions of Windows, 
+      	Mac OS X and Linux-like operating systems. The end result is an installation that 
+      	allows you to try out SUPERSMART, but it does not take full advantage of some of 
+      	the speedups provided by the kind of high-performance computing (HPC) clusters 
+      	that are available at certain academic computing centres<sup>*</sup>. 
+      </p>
+      <small>(<sup>*</sup>To install the HPC version of SUPERSMART go to the 
+      <a href="#advanced" class="scrollable">advanced topics</a>.)</small>
+      <h3>Step 1: Install VirtualBox</h3>
+      <p>
+      	<img src="images/virtualbox155x157-glow.png" class="clean inline" width="155" height="157" alt="virtualbox" />
+      	VirtualBox extends the capabilities of your existing computer so that it can run 
+      	multiple operating systems (inside multiple "virtual machines", or VMs) at the 
+      	same time. Because SUPERSMART consists of many different tools that depend on 
+      	one another we make it available as a VM that can run on any operating system
+      	that VirtualBox can run on. VirtualBox is free and open source software. 
+      	<a href="http://www.virtualbox.org/wiki/Downloads">Go here to download</a>, then
+      	run the installer.
+      </p>
+      <h3>Step 2: Install Vagrant</h2>
+      <p>
+      	<img src="images/Vagrant155x139-glow.png" class="clean inline" width="155" height="139" alt="vagrant" />      
+        Vagrant is a system for downloading, managing and launching virtual machines. It
+        tightly integrates with VirtualBox to fetch and run the most up to date version
+        of the SUPERSMART VM and to connect it to your existing computer (e.g. to exchange
+        data). Vagrant is free and open source software.
+        <a href="http://www.vagrantup.com">Go here to download</a>, then run the installer.
+      </p>
+      <h3>Step 3: Download and launch SUPERSMART</h3>
+      <p>
+		In the last step, 
+		<a href="https://github.com/naturalis/supersmart/zipball/master">download SUPERSMART
+		</a>itself, unzip the downloaded file (in some cases this happens automatically),
+		navigate in the terminal to the unzipped folder and issue the following commands:
+      </p>      
+      <pre>
+<span class="term">&gt;</span> cd supersmart-master/conf
+<span class="term">&gt;</span> vagrant up
+<span class="term">&gt;</span> vagrant ssh</pre>
+	  <p>
+	  	<strong>Please note:</strong> the <code>vagrant up</code> step will download a large amount
+	  	of data (~8Gb). This is a one time operation. Ensure that you have a fast internet 
+	  	connection and enough drive space for this. The <code>vagrant ssh</code> command
+	  	will boot you into the SUPERSMART environment.
+	  </p>
       
       <!-- run section -->
-      <h1 id="run" class="section"><a name="run"></a>Running</h1>
+      <h2 id="run" class="section"><a name="run"></a>Running</h2>
       
       <!-- advanced section -->
-      <h1 id="advanced" class="section"><a name="advanced"></a>Advanced topics</h1>
-      
-      <!-- people section -->
-      <h1 id="people" class="section"><a name="people"></a>People</h1>
-		<ul>
-			<li>Dr.<a href="http://antonelli-lab.net/">&nbsp;Alexandre Antonelli&nbsp;</a></li>
-			<li>Dr.<a href="http://rutgervos.blogspot.com/">&nbsp;Rutger Vos</a></li>
-			<li>Dr.&nbsp;<a href="https://github.com/hettling">Hannes Hettling</a></li>
-			<li>Dr.&nbsp;<a href="http://loco.biosci.arizona.edu/">Mike Sanderson</a></li>
-			<li>Dr.&nbsp;<a href="http://www.bioenv.gu.se/personal/Bengt_Oxelman/">Bengt Oxelman</a></li>
-			<li><a href="https://github.com/karinils">Karin S. Nilsson</a></li>
-			<li>Dr.<a href="http://www.matstopel.se/">&nbsp;Mats Töpel</a></li>
-			<li>Dr. <a href="http://www.ese.u-psud.fr/article232.html?lang=en">Hervé Sauquet</a></li>
-			<li>Dr. <a href="http://www.bioenv.gu.se/english/staff/Henrik_Nilsson/">Henrik Nilsson</a></li>
-			<li>Dr. <a href="http://www2.unil.ch/phylo/member/daniele-silvestro">Daniele Silvestro</a></li>
-			<li>Dr. <a href="http://scholar.google.com/citations?user=LXR09r0AAAAJ&amp;hl=en">Fabien Condamine</a></li>
-			<li><a href="https://github.com/rscharn">Ruud Scharn</a></li>
-		</ul>      
+      <h2 id="advanced" class="section"><a name="advanced"></a>Advanced topics</h2>
+      <h3>Installing on HPC systems</h3>
+      <p>
+      	To take advantage of the infrastructure provided by HPC clusters it is generally
+      	best to compile key components of the SUPERSMART pipeline from source code. To 
+		simplify this process we provide a "provisioning" script. This script is written
+		for <a href="http://puppetlabs.com/puppet/puppet-open-source">puppet</a>, which 
+		consequently must be available on your system. The script compiles and installs all 
+		dependencies, data, and code that SUPERSMART needs. At present this is done in 
+		system-wide locations, so the commands below must be 
+		executed by a privileged user<sup>*</sup>:
+	  </p>
+		<pre>
+# git clone https://github.com/naturalis/supersmart.git
+# cd supersmart/conf
+# puppet apply </pre>
+      <p>
+		The provisioning that commences when the <code>puppet apply</code> command is
+		issued can take several hours to complete.
+      </p>
+      <small>(<sup>*</sup>We are working on a solution for this.)</small>
+      <h3>Updating SUPERSMART</h3>
+      <p>
+      	The SUPERSMART pipeline is continuously under development. It is therefore wise
+      	to periodically check for updates. To do this, boot into the virtual machine
+      	(e.g. with <code>vagrant ssh</code>) and issue the following commands:
+      </p>
+	<pre>
+<span class="term">&gt;</span> cd $SUPERSMART_HOME
+<span class="term">&gt;</span> git pull</pre>            
+      <h3>Advanced run configurations</h3>     
       
       <!-- resources section -->
-      <h1 id="resources" class="section"><a name="resources"></a>Resources</h1>
+      <h2 id="resources" class="section"><a name="resources"></a>Resources</h2>
+		<ul>
+			<li><a href="http://github.com/naturalis/supersmart">Source code repository</a></li>
+			<li><a href="http://science.naturalis.nl/en/research/bioinformatics/">Naturalis Bioinformatics</a></li>
+			<li><a href="http://www.antonelli-lab.net/">Antonelli lab</a></li>
+			<li><a href="http://phylota.net">PhyLoTA</a></li>
+		</ul>      
+
+      <!-- people section -->
+      <h2 id="people" class="section"><a name="people"></a>People</h2>
+		<ul>
+			<li><a href="http://antonelli-lab.net/">Alexandre Antonelli</a></li>
+			<li><a href="http://rutgervos.blogspot.com/">Rutger Vos</a></li>
+			<li><a href="https://github.com/hettling">Hannes Hettling</a></li>
+			<li><a href="http://loco.biosci.arizona.edu/">Mike Sanderson</a></li>
+			<li><a href="http://www.bioenv.gu.se/personal/Bengt_Oxelman/">Bengt Oxelman</a></li>
+			<li><a href="https://github.com/karinils">Karin Nilsson</a></li>
+			<li><a href="http://www.matstopel.se/">Mats Töpel</a></li>
+			<li> <a href="http://www.ese.u-psud.fr/article232.html?lang=en">Hervé Sauquet</a></li>
+			<li> <a href="http://www.bioenv.gu.se/english/staff/Henrik_Nilsson/">Henrik Nilsson</a></li>
+			<li> <a href="http://www2.unil.ch/phylo/member/daniele-silvestro">Daniele Silvestro</a></li>
+			<li> <a href="http://scholar.google.com/citations?user=LXR09r0AAAAJ&amp;hl=en">Fabien Condamine</a></li>
+			<li><a href="https://github.com/rscharn">Ruud Scharn</a></li>
+		</ul> 
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
@@ -88,7 +182,6 @@
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script type="text/javascript" src="javascripts/main.js"></script>
     <script type="text/javascript">
       app.initialize();
     </script>
