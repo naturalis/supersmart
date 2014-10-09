@@ -123,9 +123,6 @@
       
       <!-- run section -->
       <h2 id="run" class="section"><a name="run"></a>Running</h2>
-      <div>
-      	<strong><em style="color:red">This section is provisional, the text-based interface is a work 
-      	in progress</em></strong>
       	<p>
       		The SUPERSMART pipeline consists of a number of different steps that can be
       		chained together by issuing commands in a terminal window, or by using 
@@ -168,12 +165,9 @@
 			</dd>
 		  </dl>  
 		  <h3>Available subcommands</h3> 	
-      	<strong><em style="color:red">This section is provisional, we need to think
-      	carefully about how to name these subcommands. They should be short and 
-      	descriptive, implying an "action".</em></strong>		  	
 		  <p>The following subcommands, which represent steps of the pipeline, are 
 		  available. For detailed usage, consult their respective usage messages by 
-		  issuing <code>smrt [SUBCOMMAND] --help</code>.</p>
+		  issuing <code>smrt help [SUBCOMMAND]</code>.</p>
 		  <dl>
 		  	<dt>taxize</dt>
 		  	<dd>Performs taxonomic name resolution by mapping a provided list of input
@@ -236,7 +230,6 @@
 		  	<dt>cladegraft</dt>
 		  	<dd>Grafts the inferred clade trees on the backbone chronogram.</dd>
 		  </dl>     
-      </div>
       
       
       
@@ -272,6 +265,54 @@
 <span class="term">&gt;</span> cd $SUPERSMART_HOME
 <span class="term">&gt;</span> git pull</pre>            
       <h3>Advanced configuration</h3>
+      <p>
+      	The SUPERSMART pipeline is configured using the file 
+      	<code>$SUPERSMART_HOME/conf/supersmart.ini</code>. Here are some of the variables
+      	in this file that can be configured by users:
+      </p>
+      <dl>
+      	<dt>EXAML_MODEL</dt>
+      	<dd>The substitution model used when inferring the backbone phylogeny. Possible 
+      	values are GAMMA for a gamma model of rate heterogeneity with 4 discrete rates, 
+      	or PSR for a per-site rate category model.</dd>
+      	<dt>TREEPL_SMOOTH</dt>
+      	<dd>Smoothing factor for the penalized likelihood tree calibration.</dd>
+      	<dt>BURNIN</dt>
+      	<dd>Fraction of burn-in to omit for the clade inference step.</dd>
+      	<dt>MSA_TOOL</dt>
+      	<dd>Multiple sequence alignment tool to use. Wrappers are available for a variety
+      	of possible aligners (which can be specified here as: mafft, clustalw, kalign, 
+      	muscle, probalign, probcons, tcoffee, amap) but the VM comes bundled with mafft
+      	and muscle.</dd>
+      	<dt>ALN_MERGE</dt>
+      	<dd>Specifies the method to use for assigning orthology among aligned clusters.
+      	The value 'blast' refers to reciprocal BLAST searches, and is most tested. Other,
+      	experimental values are 'inparanoid', where orthology is assigned transitively 
+      	from orthology assessments produced by the InParanoid project (for coding regions),
+      	or 'feature', which depends on standardized locus names in sequence annotations.      	
+      	</dd>
+      	<dt>MERGE_OVERLAP</dt>
+      	<dd>Specifies the minimum amount of reciprocal overlap among orthologous clusters
+      	for them to be merged into a supercluster.</dd>
+      	<dt>BACKBONE_INFERENCE_TOOL</dt>
+      	<dd>Specifies the tool used for inferring the backbone phylogeny. Possible values
+      	are examl or exabayes.</dd>
+      	<dt>BACKBONE_MAX_DISTANCE</dt>
+      	<dd>Maximum amount of average pairwise sequence distance that the pipeline 
+      	accepts for superclusters to be included in the backbone inference step.</dd>
+      	<dt>BACKBONE_MIN_COVERAGE</dt>
+      	<dd>Minimum number of loci that must be assembled for each taxon in the 
+      	supermatrix.</dd>
+      	<dt>CLADE_MAX_DISTANCE</dt>
+      	<dd>Maximum amount of average pairwise sequence distance that the pipeline 
+      	accepts for superclusters to be included in the clade refinement step.</dd>
+      	<dt>CLADE_MIN_DENSITY</dt>
+      	<dd>Minimum fraction of clade members (taxa) that must be sequenced in an
+      	alignment for it to be included in the clade refinement step.</dd>
+      	<dt>FOSSIL_BEST_PRACTICE_CUTOFF</dt>
+      	<dd>Defines the minimum 'best practice score' for records from the fossil table 
+      	to be used as calibration points in the tree calibration.</dd>
+      </dl>
       
       <!-- resources section -->
       <h2 id="resources" class="section"><a name="resources"></a>Resources</h2>
@@ -281,6 +322,9 @@
 			<li><a href="http://www.antonelli-lab.net/">Antonelli lab</a></li>
 			<li><a href="http://phylota.net">PhyLoTA</a></li>
 			<li><a href="http://taxosaurus.org">TaxoSaurus</a></li>
+			<li><a href="https://groups.google.com/forum/#!forum/supersmart-dev">SUPERSMART-dev</a></li>
+			<li><a href="https://groups.google.com/forum/#!forum/supersmart-users">SUPERSMART-users</a></li>
+			<li><a href="https://github.com/naturalis/supersmart/issues">Bug tracker</a></li>
 		</ul>      
 
       <!-- people section -->
