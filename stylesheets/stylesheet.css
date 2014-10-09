@@ -181,6 +181,7 @@ code {
   padding: 3px;
   margin: 0 3px;
   box-shadow: 0 0 10px rgba(0,0,0,.1);
+  font-weight: normal !important;
 }
 
 pre code {
@@ -216,12 +217,12 @@ dl dt {
 
 dl dd {
   padding-left: 20px;
-  font-style: italic;
+  /*font-style: italic;*/
 }
 
 dl p {
   padding-left: 20px;
-  font-style: italic;
+  /*font-style: italic;*/
 }
 
 hr {
