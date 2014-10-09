@@ -19,8 +19,8 @@
 	  <li><a href="#install" class="scrollable">Install</a></li>
 	  <li><a href="#run" class="scrollable">Running</a></li>
 	  <li><a href="#advanced" class="scrollable">Advanced topics</a></li>
-	  <li><a href="#people" class="scrollable">People</a></li>
 	  <li><a href="#resources" class="scrollable">Resources</a></li>
+	  <li><a href="#people" class="scrollable">People</a></li>	  
 	</ul>
 	</div>
 
@@ -118,11 +118,127 @@
 	  	<strong>Please note:</strong> the <code>vagrant up</code> step will download a large amount
 	  	of data (~8Gb). This is a one time operation. Ensure that you have a fast internet 
 	  	connection and enough drive space for this. The <code>vagrant ssh</code> command
-	  	will boot you into the SUPERSMART environment.
+	  	will log you into the SUPERSMART environment.
 	  </p>
       
       <!-- run section -->
       <h2 id="run" class="section"><a name="run"></a>Running</h2>
+      <div>
+      	<strong><em style="color:red">This section is provisional, the text-based interface is a work 
+      	in progress</em></strong>
+      	<p>
+      		The SUPERSMART pipeline consists of a number of different steps that can be
+      		chained together by issuing commands in a terminal window, or by using 
+      		scripting tools such as shell scripts, Makefiles, and so on.
+      	</p>      	
+      	<h3>The <code>smrt</code> command</h3>
+		  <p>
+			When logged into the SUPERSMART environment, steps of the pipeline can be
+			executed by issuing the <code>smrt</code> command in the 
+			terminal with the appropriate global options, subcommands, and their arguments, 
+			as follows:		
+		  </p>
+		  <pre>smrt [OPTIONS] [commands|help] [SUBCOMMAND] [ARGUMENTS]</pre>
+		  <p>Examples of different ways in which <code>smrt</code> can be 
+		  used:</p>
+		  <dl>
+			<dt>smrt</dt>
+			<dd>Prints brief, overall help message and quits.</dd>	
+			<dt>smrt --version</dt>
+			<dd>Prints version number and quits.</dd>	  
+			<dt>smrt commands</dt>
+			<dd>Lists all available subcommands and quits.</dd>
+			<dt>smrt help [SUBCOMMAND]</dt>
+			<dd>Prints help message about the specified subcommand and quits.</dd>
+			<dt>smrt [SUBCOMMAND] [ARGUMENTS]</dt>
+			<dd>Runs the specified subcommand with the provided arguments.</dd>
+			<dt>smrt [OPTIONS] [SUBCOMMAND] [ARGUMENTS]</dt>
+			<dd>Runs the specified subcommand with the provided arguments and with 
+			alternative global options in effect. The following global options are 
+			available:
+			  <dl>
+				<dt>--workdir=&lt;location&gt;</dt>
+				<dd>Specifies where data files are written to and read from. By default
+				this is the current working directory.</dd>
+				<dt>--verbose</dt>
+				<dd>Sets the global verbosity, can be repeated multiple times. By default,
+				verbosity is set such that warning and error messages are shown, 
+				but informational and debugging messages are hidden.</dd>
+			  </dl>		  	
+			</dd>
+		  </dl>  
+		  <h3>Available subcommands</h3> 	
+      	<strong><em style="color:red">This section is provisional, we need to think
+      	carefully about how to name these subcommands. They should be short and 
+      	descriptive, implying an "action".</em></strong>		  	
+		  <p>The following subcommands, which represent steps of the pipeline, are 
+		  available. For detailed usage, consult their respective usage messages by 
+		  issuing <code>smart [SUBCOMMAND] --help</code>.</p>
+		  <dl>
+		  	<dt>taxize</dt>
+		  	<dd>Performs taxonomic name resolution by mapping a provided list of input
+		  	names onto the NCBI taxonomy. Optionally expands the higher input taxa to the 
+		  	specified lower taxon, e.g. to expand a named Order to its constituent 
+		  	species. Produces a table that lists all resolved (and expanded) taxa and 
+		  	their higher classification.</dd>
+		  	<dt>classify</dt>
+		  	<dd>Given an input table of resolved taxa, produces a taxonomy tree, i.e.
+		  	a polytomous cladogram with labeled interior nodes, in Newick format. This
+		  	tree is used as a starting tree to infer a backbone phylogeny.</dd>
+		  	<dt>align</dt>
+		  	<dd>Given an input table of resolved taxa, performs multiple sequence 
+		  	alignment of all potentially useful <a href="http://phylota.net">PhyLoTA</a>
+		  	clusters for the taxa of interest. Produces a list of aligned candidate 
+		  	clusters. The alignment method can be configured, effective methods 
+		  	include those provided by <code>muscle</code> and <code>mafft</code>.</dd>
+		  	<dt>orthologize</dt>
+		  	<dd>Given a list of aligned candidate clusters, assigns orthology among the
+		  	clusters by performing reciprocal <code>blast</code> searches on the seed 
+		  	sequences around which the clusters were assembled. Produces a list of 
+		  	re-aligned superclusters.</dd>
+		  	<dt>bbmerge</dt>
+		  	<dd>Given a list of superclusters and an input table of resolved taxa, creates
+		  	a supermatrix that can be used to infer a backbone phylogeny. The supermatrix
+		  	contains up to two, distal exemplar species from each genus and an optimized 
+		  	selection of superclusters that minimizes sparseness of the supermatrix while
+		  	attaining a user-specified minimum number of distinct markers for each taxon
+		  	and omitting any alignments that exceed a user-specified maximum amount of
+		  	sequence divergence.
+		  	</dd>
+		  	<dt>bbinfer</dt>
+		  	<dd>Given a supermatrix and a starting tree, infers a backbone phylogeny. This
+		  	backbone is typically a tree that reconstructs the relationships among a large
+		  	number of genera (represented by up to two exemplar species) and so this step
+		  	employs large-scale phylogenetic inference methods such as provided by 
+		  	<code>ExaML</code> and similar tools.</dd>
+		  	<dt>bbreroot</dt>
+		  	<dd>Given a backbone phylogeny and a table of resolved taxa, reroots the 
+		  	phylogeny to approximate the rooting implied by the classification hierarchy 
+		  	of the provided, resolved taxa.</dd>
+		  	<dt>bbcalibrate</dt>
+		  	<dd>Given a rooted molecular backbone phylogeny and a table of fossils, 
+		  	performs tree calibration using <code>treePL</code>. Produces an ultrametric 
+		  	tree with branch lengths proportional to evolutionary time (i.e. a 
+		  	"chronogram").</dd>
+		  	<dt>bbdecompose</dt>
+		  	<dd>Given a rooted backbone phylogeny, a list of superclusters and a table of 
+		  	resolved taxa, decomposes the backbone into its constituent, most recent, 
+		  	monophyletic clades, expands these clades into all taxa from the provided
+		  	table and assembles sets of alignments for each clade that can be used for
+		  	further tree inference within that clade.</dd>
+		  	<dt>clademerge</dt>
+		  	<dd>For each decomposed clade, merges the set of alignments assembled for this
+		  	clade into an input file for tree inference.</dd>
+		  	<dt>cladeinfer</dt>
+		  	<dd>For each decomposed clade, infers the species tree. This is done using
+		  	the multispecies, multilocus coalescent as implemented in <code>*BEAST</code>
+		  	on the basis of the merged set of alignments for that clade.</dd>
+		  	<dt>cladegraft</dt>
+		  	<dd>Grafts the inferred clade trees on the backbone chronogram.</dd>
+		  </dl>     
+      </div>
+      
+      
       
       <!-- advanced section -->
       <h2 id="advanced" class="section"><a name="advanced"></a>Advanced topics</h2>
@@ -164,6 +280,7 @@
 			<li><a href="http://science.naturalis.nl/en/research/bioinformatics/">Naturalis Bioinformatics</a></li>
 			<li><a href="http://www.antonelli-lab.net/">Antonelli lab</a></li>
 			<li><a href="http://phylota.net">PhyLoTA</a></li>
+			<li><a href="http://taxosaurus.org">TaxoSaurus</a></li>
 		</ul>      
 
       <!-- people section -->
