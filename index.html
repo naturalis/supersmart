@@ -320,16 +320,132 @@
       
       <!-- resources section -->
       <h2 id="resources" class="section"><a name="resources"></a>Resources</h2>
-		<ul>
-			<li><a href="http://github.com/naturalis/supersmart">Source code repository</a></li>
-			<li><a href="http://science.naturalis.nl/en/research/bioinformatics/">Naturalis Bioinformatics</a></li>
-			<li><a href="http://www.antonelli-lab.net/">Antonelli lab</a></li>
-			<li><a href="http://phylota.net">PhyLoTA</a></li>
-			<li><a href="http://taxosaurus.org">TaxoSaurus</a></li>
-			<li><a href="https://groups.google.com/forum/#!forum/supersmart-dev">SUPERSMART-dev</a></li>
-			<li><a href="https://groups.google.com/forum/#!forum/supersmart-users">SUPERSMART-users</a></li>
-			<li><a href="https://github.com/naturalis/supersmart/issues">Bug tracker</a></li>
-		</ul>      
+      	<h3>Installation prerequisites</h3>
+      		<p>To install the SUPERSMART pipeline as a virtual machine:</p>
+      		<ul>
+      			<li><a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a></li>
+      			<li><a href="http://www.vagrantup.com/downloads.html">Vagrant</a></li>      			
+      		</ul>
+      		<p>To install the pipeline on HPC infrastructure:</p>
+      		<ul>
+      			<li><a href="http://git-scm.com/downloads">git</a></li>
+      			<li><a href="http://puppetlabs.com/puppet/puppet-open-source">puppet</a></li>
+      		</ul>      		      	
+      	<h3>Analysis tools used internally</h3>
+      		<p>The following analysis tools are used by the SUPERSMART pipeline. If you
+      		use results obtained by the pipeline in a scholarly publication, please cite
+      		these tools as well. Listed are the tools that the pipeline uses by default,
+      		if you alter these (by <a href="#advanced" class="scrollable">editing the
+      		configuration file</a>), update your cited references accordingly:</p>
+      		<ul>
+      			<li>Taxonomic name resolution is performed using 
+      			<a href="http://www.taxosaurus.org">TaxoSaurus</a></li>      		
+      			<li>The sequence data have been pre-processed using the 
+      			<a href="http://www.phylota.net">PhyLoTA</a> pipeline.</li>      		
+      			<li>The default multiple sequence alignment tool is 
+      			<a href="http://mafft.cbrc.jp/alignment/software/">mafft</a></li>
+      			<li>The default profile alignment tool is
+      			<a href="http://www.drive5.com/muscle/">muscle</a></li>
+      			<li>The default method for assessing orthology uses 
+      			<a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a></li>
+      			<li>The default inference tool for the backbone phylogeny is
+      			<a href="http://sco.h-its.org/exelixis/web/software/examl/index.html">ExaML</a></li>
+      			<li>The default inference tool for the clade phylogenies is
+      			<a href="http://beast.bio.ed.ac.uk/">BEAST</a></li>
+      			<li>The default tool used for tree calibration is
+      			<a href="https://github.com/blackrim/treePL">treePL</a></li>
+      			<li>Data transformation and file conversion is performed using
+      			<a href="http://search.cpan.org/dist/Bio-Phylo">Bio::Phylo</a> and
+      			<a href="http://www.bioperl.org">BioPerl</a></li>
+      		</ul>
+      	
+      	<h3>Getting help</h3>
+			<ul>
+				<li>The <a href="https://groups.google.com/forum/#!forum/supersmart-users">
+				SUPERSMART-users</a> mailing list is for end users to ask questions, 
+				discuss problems, and so on.</li>
+				<li>The <a href="https://groups.google.com/forum/#!forum/supersmart-dev">
+				SUPERSMART-dev</a> mailing list is for developers (and technologically 
+				sophisticated users) to discuss implementation details of the pipeline.</li>
+				<li>The <a href="https://github.com/naturalis/supersmart/issues">bug tracker</a>
+				is used for managing progress on specific bugs, feature requests and
+				enhancements.</li>
+			</ul>
+      	
+      	<h3>Relevant literature</h3>
+      		<p class="cite">
+      			<strong>Altschul S. F., Gish W., Miller W., Myers E. W. and D. J. Lipman
+      			</strong> 1990. Basic local alignment search tool <em>Journal of 
+      			Molecular Biology</em> <strong>215</strong>: 403-410
+      			[doi:<a href="http://dx.doi.org/10.1016/S0022-2836(05)80360-2">10.1016/S0022-2836(05)80360-2</a>] 
+      		</p>
+      		<p class="cite">
+      			<strong>Antonelli A., Condamine F.L., Hettling H., Nilsson K. S., Nilsson 
+      			R. H., Oxelman B., Sanderson M. J., Sauquet H., Scharn R., Silvestro D., 
+      			Töpel M., and R. A. Vos.</strong> 2014. SUPERSMART: Ecology and Evolution 
+      			in the Era of Big Data. <em>PeerJ Preprints</em> <strong>2</strong>:e501v1 
+      			[doi:<a href="http://dx.doi.org/10.7287/peerj.preprints.501v1">10.7287/peerj.preprints.501v1</a>]
+      		</p>
+			<p class="cite">
+				<strong>Drummond A. J., Suchard M. A., Xie D. and A. Rambaut</strong> 
+				2012. Bayesian phylogenetics with BEAUti and the BEAST 1.7 
+				<em>Molecular Biology And Evolution</em> <strong>29</strong>: 1969-1973
+				[doi:<a href="http://dx.doi.org/10.1093/molbev/mss075">10.1093/molbev/mss075</a>]
+			</p>      	
+			<p class="cite">
+				<strong>Edgar, R.C.</strong> 2004. MUSCLE: multiple sequence alignment 
+				with high accuracy and high throughput <em>Nucleic Acids Research</em>
+				<strong>32</strong>:1792-1797 
+				[doi:<a href="http://dx.doi.org/10.1093/nar/gkh340">10.1093/nar/gkh340</a>] 
+			</p>
+			<p class="cite">
+				<strong>Katoh K. and D. M. Standley</strong> 2013 MAFFT multiple sequence 
+				alignment software version 7: improvements in performance and usability
+				<em>Molecular Biology and Evolution</em> <strong>30</strong>:772-780) 
+				[doi:<a href="http://dx.doi.org/10.1093/molbev/mst010">10.1093/molbev/mst010</a>]			
+			</p>
+      		<p class="cite">
+				<strong>Sanderson, M. J., D. Boss, D. Chen, K. A. Cranston, and 
+				A. Wehe.</strong> 2008. The PhyLoTA Browser: Processing GenBank for 
+				molecular phylogenetics research. <em>Systematic Biology</em> 
+				<strong>57</strong>:335-346.     	
+				[doi:<a href="http://dx.doi.org/10.1080/10635150802158688">10.1080/10635150802158688</a>]
+			</p>
+			<p class="cite">
+				<strong>Smith, S. A. and O'Meara. B. C.</strong> 2012. treePL: 
+				divergence time estimation using penalized likelihood for large 
+				phylogenies. <em>Bioinformatics</em> <strong>28</strong>: 2689-2690.
+				[doi:<a href="http://dx.doi.org/10.1093/bioinformatics/bts492">10.1093/bioinformatics/bts492</a>]
+			</p>
+			<p class="cite">
+				<strong>Stamatakis, A. and A. J. Aberer</strong> 2013. Novel 
+				Parallelization Schemes for Large-Scale Likelihood-based Phylogenetic 
+				Inference. <em>Parallel & Distributed Processing (IPDPS), 2013 IEEE 27th 
+				International Symposium</em> 1195-1204
+				[doi:<a href="http://dx.doi.org/10.1109/IPDPS.2013.70">10.1109/IPDPS.2013.70</a>]
+			</p>
+			<p class="cite">
+				<strong>Stoltzfus A., Lapp H., Matasci N., Deus H., Sidlauskas B., Zmasek C. M., 
+				Vaidya G., Pontelli E., Cranston K., Vos R. A., Webb C. O., Harmon L. J., 
+				Pirrung M., O'Meara B. C., Pennell M. W., Mirarab S., Rosenberg M. S., 
+				Balhoff J. P., Bik H. M., Heath T., Midford P., Brown J. W., 
+				McTavish E. J., Sukumaran J., Westneat M., Alfaro M. E. and A Steele.</strong>
+				2013. Phylotastic! Making Tree-of-Life Knowledge Accessible, Re-usable 
+				and Convenient. <em>BMC Bioinformatics</em> <strong>14</strong>:158 
+				[doi:<a href="http://dx.doi.org/10.1186/1471-2105-14-158">10.1186/1471-2105-14-158</a>]
+			</p>
+			<p class="cite">
+				<strong>Vos R. A., Biserkov J. V., Balech B., Beard N., Blissett M., 
+				Brenninkmeijer C., van Dooren T., Eades D., Gosline G., Groom Q. J., 
+				Hamann T. D., Hettling H., Hoehndorf R., Holleman A., Hovenkamp P., 
+				Kelbert P., King D., Kirkup D., Lammers Y., DeMeulemeester T., 
+				Mietchen D., Miller J. A., Mounce R., Nicolson N., Page R. D. M., 
+				Pawlik A., Pereira S., Penev L., Richards K., Sautter G., 
+				Shorthouse D. P., Tähtinen M., Weiland C., Williams A. R. and 
+				S. Sierra.</strong> 2014. Enriched biodiversity data as a resource and service. 
+				<em>Biodiversity Data Journal</em> <strong>2</strong>:e1125 
+				[doi:<a href="http://dx.doi.org/10.3897/BDJ.2.e1125">10.3897/BDJ.2.e1125</a>]
+			</p>
 
       <!-- people section -->
       <h2 id="people" class="section"><a name="people"></a>People</h2>
