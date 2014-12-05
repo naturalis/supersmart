@@ -248,9 +248,9 @@
 		executed by a privileged user<sup>*</sup>:
 	  </p>
 		<pre>
-# git clone https://github.com/naturalis/supersmart.git
-# cd supersmart/conf
-# puppet apply </pre>
+$ git clone https://github.com/naturalis/supersmart.git
+$ cd supersmart/conf
+$ puppet apply </pre>
       <p>
 		The provisioning that commences when the <code>puppet apply</code> command is
 		issued can take several hours to complete.
@@ -271,7 +271,9 @@
       <h3>Advanced configuration</h3>
       <p>
       	The SUPERSMART pipeline is configured using the file 
-      	<code>$SUPERSMART_HOME/conf/supersmart.ini</code>. Here are some of the variables
+      	<code>$SUPERSMART_HOME/conf/supersmart.ini</code>. For convenience, SUPERSMART provides
+      	the system-wide command <code>smrt-config</code> which opens the configuration file with 
+      	in the system's default editor. Here are some of the variables
       	in this file that can be configured by users:
       </p>
       <dl>
