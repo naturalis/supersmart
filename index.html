@@ -8,6 +8,8 @@
     <link rel="icon" href="images/favicon.ico" />
     <script type="text/javascript" src="javascripts/jquery.js"></script>
     <script type="text/javascript" src="javascripts/main.js"></script>    
+    <script type="text/javascript" src="javascripts/GetLatestReleaseInfo.js"></script>    
+  
     <title>SUPERSMART</title>
   </head>
   <body>
@@ -35,9 +37,10 @@
           <h2 id="project_tagline">Self-Updating Platform for the Estimation of Rates of Speciation, Migration And Relationships of Taxa</h2-->
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/naturalis/supersmart/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/naturalis/supersmart/tarball/master">Download this project as a tar.gz file</a>
+              <a id="zipdownload" class="zip_download_link" href="">Download this project as a .zip file</a> 
+              <a id="tardownload" class="tar_download_link" href="">Download this project as a tar.gz file</a>
             </section>
+
         </header>
     </div>
 
@@ -48,7 +51,7 @@
 
       <!-- intro section -->
       <h2 id="intro" class="section"><a name="intro"></a>Introduction</h2>
-      <p>
+      <p>                   
       	The Self-Updating Platform for Estimating Rates of Speciation and Migration,
       	Ages and Relationships of Taxa (SUPERSMART) is a self-contained, 
       	<a href="#install" class="scrollable">easy to install</a> analytical 
@@ -106,13 +109,13 @@
       </p>
       <h3>Step 3: Download and launch SUPERSMART</h3>
       <p>
-		In the last step, 
-		<a href="https://github.com/naturalis/supersmart/zipball/master">download SUPERSMART
-		</a>itself, unzip the downloaded file (in some cases this happens automatically),
+		In the last step, 		
+		<a href="" id="tardownload">download SUPERSMART </a>		
+		itself, unzip the downloaded file (in some cases this happens automatically),
 		navigate in the terminal to the unzipped folder and issue the following commands:
       </p>      
       <pre>
-<span class="term">&gt;</span> cd supersmart-master/conf
+<span class="term">&gt;</span> cd <div style="display:inline" id="dirname"></div>/conf
 <span class="term">&gt;</span> vagrant up
 <span class="term">&gt;</span> vagrant ssh</pre>
 	  <p>

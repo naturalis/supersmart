@@ -27,6 +27,12 @@ var app = {
 				$(this).text('$');
 			}
 		});		
+	    
+	    // load function to get link to latest SUPERSMART release				
+		$(document).ready(function () {
+			GetLatestReleaseInfo();  
+		});  
+				
 				
 	}
 }
