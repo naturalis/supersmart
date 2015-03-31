@@ -107,20 +107,17 @@
         data). Vagrant is free and open source software.
         <a href="http://www.vagrantup.com">Go here to download</a>, then run the installer.
       </p>
-      <h3>Step 3: Download and launch SUPERSMART</h3>
+      <h3>Step 3: Launch SUPERSMART</h3>
       <p>
-		In the last step, 		
-		<a href="" id="tardownload">download SUPERSMART </a>		
-		itself, unzip the downloaded file (in some cases this happens automatically),
-		navigate in the terminal to the unzipped folder and issue the following commands:
-      </p>      
+	In the last step, SUPERSMART gets downloaded, installed and started using two
+	simple commands issued from the command line: 		
       <pre>
-<span class="term">&gt;</span> cd <div style="display:inline" id="dirname"></div>/conf
-<span class="term">&gt;</span> vagrant up
-<span class="term">&gt;</span> vagrant ssh</pre>
+<!-- <span class="term">&gt;</span> cd <div style="display:inline" id="dirname"></div>/conf -->
+	<span class="term">&gt;</span> vagrant init Naturalis/supersmart
+	<span class="term">&gt;</span> vagrant ssh</pre>
 	  <p>
-	  	<strong>Please note:</strong> the <code>vagrant up</code> step will download a large amount
-	  	of data (~8Gb). This is a one time operation. Ensure that you have a fast internet 
+	  <strong>Please note:</strong> the <code>vagrant up</code> step will download a large amount
+	  	of data (~12Gb). This is a one time operation. Ensure that you have a fast internet 
 	  	connection and enough drive space for this. The <code>vagrant ssh</code> command
 	  	will log you into the SUPERSMART environment.
 	  </p>
