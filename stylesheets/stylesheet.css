@@ -184,6 +184,27 @@ code {
   font-weight: normal !important;
 }
 
+.comment {
+	color: silver;
+}
+
+.toggle {
+	text-decoration: none;
+	color: silver;
+}
+
+.toggle a:hover {
+	text-decoration: none;
+}
+
+.red {
+	color: #feb4b4
+}
+
+.green {
+	color: #94e79a
+}
+
 pre code {
   display: block;
   box-shadow: none;
