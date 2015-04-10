@@ -32,7 +32,24 @@ var app = {
 		$(document).ready(function () {
 			GetLatestReleaseInfo();  
 		});  
-				
-				
+		
+		// set the toggle for shell comments
+		$('.comment').each(function(){
+			var comment = $(this);
+			comment.slideUp(0);
+			var button = $('<a title="Typical shell feedback">+</a>').bind('click',function() {
+				if ( $(this).text() == '+' ) {
+					comment.slideDown();
+					$(this).text('-');
+				}
+				else {
+					comment.slideUp();
+					$(this).text('+');
+				}
+			});
+			var widget = $('<span class="toggle"></span>');
+			widget.append('[',button,']<br />');
+			$(widget).insertBefore(comment);
+		});					
 	}
 }
