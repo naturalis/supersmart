@@ -247,16 +247,22 @@ Last login: Tue Mar 31 07:21:40 2015 from 10.0.2.2
 		  	backbone is typically a tree that reconstructs the relationships among a large
 		  	number of genera (represented by up to two exemplar species) and so this step
 		  	employs large-scale phylogenetic inference methods such as provided by 
-		  	<code>ExaML</code> and similar tools.</dd>
+		  	<code>ExaML</code>, <code>RaXML</code> or <code>ExaBayes</code>. Bootstrap analysis is 
+		  	supported for non-bayesian tree inference.</dd>
 		  	<dt>bbreroot</dt>
 		  	<dd>Given a backbone phylogeny and a table of resolved taxa, reroots the 
 		  	phylogeny to approximate the rooting implied by the classification hierarchy 
-		  	of the provided, resolved taxa.</dd>
+		  	of the provided, resolved taxa. Rerooting at user-specified outgroup taxa is 
+		  	supported. Also works on sets of trees (e.g. boostrap replicates).</dd>
 		  	<dt>bbcalibrate</dt>
 		  	<dd>Given a rooted molecular backbone phylogeny and a table of fossils, 
 		  	performs tree calibration using <code>treePL</code>. Produces an ultrametric 
 		  	tree with branch lengths proportional to evolutionary time (i.e. a 
-		  	"chronogram").</dd>
+		  	"chronogram"). Also works on sets of trees (e.g. boostrap replicates).</dd>
+		  	<dt>consense</dt>
+		  	<dd> Given a file containing a set of trees (bootstrap replicates or 
+		  	Bayesian posterior set), calculates a consensus tree annotated with boostrap 
+		  	support and posterior support values, respectively. </dd>
 		  	<dt>bbdecompose</dt>
 		  	<dd>Given a rooted backbone phylogeny, a list of superclusters and a table of 
 		  	resolved taxa, decomposes the backbone into its constituent, most recent, 
