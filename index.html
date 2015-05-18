@@ -432,16 +432,13 @@ $ puppet apply </pre>
 				<li><strong> How can I exchange data between the SUPERSMART environment running on the virtual machine and my computer? </strong> <br/>
 				To exchange data between the virtual machine and your host computer (e.g. to upload data or to retrieve your analysis results), 
 				all you have to do is to copy files to or from the <code>/vagrant/</code> directory on the virtual machine. 
-				All files present in this directory are accessible on your host computer in the directory in which you issued 
-				the command <code>vagrant up</code> to start the virtual machine. To for instance copy the file
-				<code>myfossils.txt</code> into the home directory of the virtual machine running SUPERSMART, place the file in 
-				the <code>supersmart-master/conf</code> directory on your host computer and issue
-				<pre>cp /vagrant/myfossils.txt ~ </pre>
-				on the virtual machine. 
-				</li>
-			</ul>
-      	
-      	
+				All files present in this directory are accessible on your host computer, in the directory in which you issued 
+				the commands <code>vagrant init</code> and <code>vagrant up</code> to start the virtual machine. If for instance 
+				you want to copy a file <code> myfossils.tsv </code> to the virtual machine which was created in the 
+				directory <code> ~/my-supersmart/ </code>, place the file in that directory.
+				Logging onto the virtual machine (<code>vagrant ssh</code>), you can then acces the file in the <code>/vagrant/</code>
+				directory.
+    
       	<h3>Relevant literature</h3>
       		<p class="cite">
       			<strong>Altschul S. F., Gish W., Miller W., Myers E. W. and D. J. Lipman
