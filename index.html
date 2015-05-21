@@ -416,28 +416,18 @@ $ puppet apply </pre>
       	
       	<h3>Getting help</h3>
 			<ul>
+				<li> The <a href="https://github.com/naturalis/supersmart/wiki">Wiki</a>
+				has detailed installation instructions and a growing FAQ</li>
 				<li>The <a href="https://groups.google.com/forum/#!forum/supersmart-users">
-				SUPERSMART-users</a> mailing list is for end users to ask questions, 
+				SUPERSMART-users</a> mailing list is used by developers and users to ask questions, 
 				discuss problems, and so on.</li>
 				<li>The <a href="https://groups.google.com/forum/#!forum/supersmart-dev">
-				SUPERSMART-dev</a> mailing list is for developers (and technologically 
-				sophisticated users) to discuss implementation details of the pipeline.</li>
+				SUPERSMART-dev</a> mailing list is for developers (and those interested in
+				the arcana) to discuss implementation details of the pipeline.</li>
 				<li>The <a href="https://github.com/naturalis/supersmart/issues">bug tracker</a>
 				is used for managing progress on specific bugs, feature requests and
 				enhancements.</li>
 			</ul>
-      	
-		<h3>FAQ</h3>
-			<ul>
-				<li><strong> How can I exchange data between the SUPERSMART environment running on the virtual machine and my computer? </strong> <br/>
-				To exchange data between the virtual machine and your host computer (e.g. to upload data or to retrieve your analysis results), 
-				all you have to do is to copy files to or from the <code>/vagrant/</code> directory on the virtual machine. 
-				All files present in this directory are accessible on your host computer, in the directory in which you issued 
-				the commands <code>vagrant init</code> and <code>vagrant up</code> to start the virtual machine. Example: If  
-				you want to copy a file <code> myfossils.tsv </code> to the virtual machine which was created e.g. in the 
-				directory <code> ~/my-supersmart/ </code>, place the file in that directory.
-				Logging onto the virtual machine (<code>vagrant ssh</code>), you can then acces the file in the <code>/vagrant/</code>
-				directory.
     
       	<h3>Relevant literature</h3>
       		<p class="cite">
