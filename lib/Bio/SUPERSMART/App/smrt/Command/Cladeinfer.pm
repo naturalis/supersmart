@@ -257,8 +257,7 @@ sub run {
     # XXX these should be configurable from phylota.ini
     $beast->beagle_SSE(1);
     $beast->beagle_CPU(1);
-    $beast->beagle_instances(1);
-    
+
     # overwrite any previously existing output files, $rebuild applies
     # to any previously existing input BEAST XML files, which may 
     # have been edited
@@ -280,29 +279,32 @@ sub run {
         $beast->outfile_name( "${stem}.nex${suffix}" );
         $beast->logfile_name( "${stem}.log${suffix}" );
 
-		# set outgroup if present 
-		$self->set_outgroup( $beast, $stem);
-
+	# set outgroup if present 
+	$self->set_outgroup( $beast, $stem );
+	
         # set input file
         $logger->info("Setting beast input file name to ${stem}-beast-in.xml");
         $beast->beastfile_name( "${stem}-beast-in.xml" );
+
+	# all cores are available for BEAST
+	$beast->beagle_instances( $config->NODES );
         
-		# run BEAST
-		$beast->run( $file );
+	# run BEAST
+	$beast->run( $file );
         $logger->info("Done. Trees are in ${file}.nex, BEAST log in ${file}.log");
         
-		# concatenate 
-		if ( $opt->append ) {
-			$self->append_logs(
-				'trees'  => [ "${stem}.nex${suffix}" => "${stem}.nex" ],
-				'params' => [ "${stem}.log${suffix}" => "${stem}.log" ],
-				'burnin' => $opt->burnin,
-				);
-		}        	
+	# concatenate 
+	if ( $opt->append ) {
+	    $self->append_logs(
+		'trees'  => [ "${stem}.nex${suffix}" => "${stem}.nex" ],
+		'params' => [ "${stem}.log${suffix}" => "${stem}.log" ],
+		'burnin' => $opt->burnin,
+		);
+	}        	
     }
     
     else {
-		
+	
         # iterate over entries in work dir
         my @cladedirs;
         opendir my $dh, $workdir or die $!;
@@ -330,8 +332,14 @@ sub run {
                 $beast->outfile_name( "${stem}.nex${suffix}" );
                 $beast->logfile_name( "${stem}.log${suffix}" );				
                 $beast->beastfile_name( "${stem}-beast-in.xml" );
-				# set outgroup if present 
-				$self->set_outgroup( $beast, $stem );				
+		# set outgroup if present 
+		$self->set_outgroup( $beast, $stem );				
+
+		# check if we can run with multiple instances
+		if ( $config->NODES > scalar(@cladedirs) ) {
+		    my $instances = int( $config->NODES / scalar(@cladedirs) );
+		    $beast->beagle_instances( $instances );
+		}
                 $beast->run( $file );
                 
                 # concatenate 

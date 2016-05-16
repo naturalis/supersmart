@@ -147,19 +147,20 @@ sub init {
 		'-level' => $verbosity,
 		'-style' => $opt->logstyle,
 		'-class' => [ 
-			ref( $self ), 
-			'Bio::SUPERSMART::App::SubCommand', 
-			'Bio::SUPERSMART::Domain::MarkersAndTaxa', 
-			'Bio::SUPERSMART::Service::ParallelService', 
-			'Bio::SUPERSMART::Service::TreeService', 
-			'Bio::SUPERSMART::Service::CalibrationService',
-			'Bio::SUPERSMART::Service::SequenceGetter',
-			'Bio::SUPERSMART::Service::MarkersAndTaxaSelector',
-			'Bio::SUPERSMART::Service::DecorationService',
-			'Bio::Tools::Run::Phylo::ExaML',
-			'Bio::Tools::Run::Phylo::ExaBayes',
+		    ref( $self ), 
+		    'Bio::SUPERSMART::App::SubCommand', 
+		    'Bio::SUPERSMART::Domain::MarkersAndTaxa', 
+		    'Bio::SUPERSMART::Service::ParallelService', 
+		    'Bio::SUPERSMART::Service::TreeService', 
+		    'Bio::SUPERSMART::Service::CalibrationService',
+		    'Bio::SUPERSMART::Service::SequenceGetter',
+		    'Bio::SUPERSMART::Service::MarkersAndTaxaSelector',
+		    'Bio::SUPERSMART::Service::DecorationService',
+		    'Bio::Tools::Run::Phylo::ExaML',
+		    'Bio::Tools::Run::Phylo::ExaBayes',
+		    'Bio::Tools::Run::Phylo::StarBEAST',
 		],		
-    ));
+	));
    
 	# set working directory
 	my $wd = $opt->workdir || '.';
