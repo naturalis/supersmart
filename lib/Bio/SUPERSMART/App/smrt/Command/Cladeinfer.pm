@@ -287,8 +287,8 @@ sub run {
     $beast->beastfile_name( "${stem}-beast-in.xml" );
 
 	# all cores are available for BEAST
-	$beast->beagle_instances( $config->NODES );
-	$beast->threads( $config->nodes );
+	$beast->beagle_instances( 1 );
+	# $beast->threads( $config->nodes );
     
 	# run BEAST
 	$beast->run( $file );
@@ -337,11 +337,11 @@ sub run {
 		$self->set_outgroup( $beast, $stem );				
 
 		# check if we can run with multiple instances
-		if ( $config->NODES > scalar(@cladedirs) ) {
-		    my $instances = int( $config->NODES / scalar(@cladedirs) );
-		    $beast->beagle_instances( $instances );
-		    $beast->threads( $instances );
-		}
+		#if ( $config->NODES > scalar(@cladedirs) ) {
+		#    my $instances = int( $config->NODES / scalar(@cladedirs) );
+		    #$beast->beagle_instances( $instances );
+		    #$beast->threads( $instances );
+		#}
                 $beast->run( $file );
                 
                 # concatenate 
