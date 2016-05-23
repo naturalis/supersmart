@@ -1,15 +1,9 @@
 package Bio::SUPERSMART::App::smrt::Command::BBmerge;
 use strict;
 use warnings;
-use Bio::Phylo::Factory;
-use Bio::Phylo::Matrices::Datum;
 use Bio::SUPERSMART::Config;
 use Bio::SUPERSMART::Domain::MarkersAndTaxa;
-use Bio::SUPERSMART::Service::TreeService;
 use Bio::SUPERSMART::App::SubCommand;
-use List::MoreUtils qw(uniq);
-use List::Util qw(max);
-use Data::Dumper;
 use base 'Bio::SUPERSMART::App::SubCommand';
 use Bio::SUPERSMART::App::smrt qw(-command);
 
@@ -75,21 +69,22 @@ cases.
 
 sub options {
     my ( $self, $opt, $args ) = @_;
+	my $indir_default        = "clusters";
     my $outfile_default      = "supermatrix.phy";
     my $outformat_default    = "phylip";
     my $markerstable_default = "markers-backbone.tsv";
     my $taxa_default         = "species.tsv";
-    my $merged_default       = "merged.txt";	
     my $config       = Bio::SUPERSMART::Config->new;
 	my $exemplars_default = $config->BACKBONE_EXEMPLARS;
 	my @formats = qw (bl2seq clustalw emboss fasta maf mase mega meme msf nexus pfam phylip prodom psi selex stockholm mrbayes);
     return (
-        [
-            "alnfile|a=s",
-			"list of file locations of merged alignments  as produced by 'smrt orthologize'",
-            { arg => "file", default => $merged_default, galaxy_in => 1, galaxy_format => 'tabular', galaxy_type => "data" }
-        ],
-        [
+		[
+		     "indir|i=s",
+		     "directory or zip file with merged sequence alignments, as produced by 'smrt orthologize'",
+		     { arg => "file", default => $indir_default, galaxy_in => 1, galaxy_format => 'tabular', galaxy_type => "data", galaxy_label => 'alignments' }
+		],
+		
+       [
             "taxafile|t=s",
             "tsv (tab-seperated value) taxa file as produced by 'smrt taxize'",
             { arg => "file", default => $taxa_default, galaxy_in => 1, galaxy_format => 'tabular', galaxy_type => "data" }
@@ -105,7 +100,7 @@ sub options {
             { default => $outformat_default, galaxy_in => 1, galaxy_type => "select", galaxy_options => \@formats, galaxy_value => $outformat_default }
         ],
         [
-            "include_taxa|i=s",
+            "include_taxa|c=s",
 			"one or multiple names of taxa present in 'taxafile' (e.g. species or genus names, separated by commata) whose representative species will be included in the output dataset, regardless of marker coverage and sequence divergence",
             { galaxy_in => 1, galaxy_type => "text" }
         ],
@@ -133,12 +128,13 @@ sub validate {
     my ( $self, $opt, $args ) = @_;
 
     # If alignment or taxa file is absent or empty, abort
-    my @files = ( $opt->alnfile, $opt->taxafile );
-    for my $file (@files) {
-        $self->usage_error("need alnfile and taxafile arguments") if not $file;
-        $self->usage_error("file $file does not exist") unless -e $file;
-        $self->usage_error("file $file is empty")       unless -s $file;
-    }
+	my $file = $opt->taxafile;
+	$self->usage_error("need taxafile argument") if not $file;
+	$self->usage_error("file $file does not exist") unless -e $file;
+	$self->usage_error("file $file is empty")       unless -s $file;
+	my $in = $opt->indir;
+	$self->usage_error("no indir argument given") if not $in;
+
 }
 
 sub run {
@@ -148,10 +144,11 @@ sub run {
     my $taxafile     = $opt->taxafile;
     my $outfile      = $self->outfile;
     my $include_taxa = $opt->include_taxa;
-
+	my $alndir = $self->process_inputdir( $opt->indir );
+ 
     # instantiate helper objects
     my $config = Bio::SUPERSMART::Config->new;
-    my $mt  = Bio::SUPERSMART::Domain::MarkersAndTaxa->new($opt->alnfile, $config->BACKBONE_MIN_COVERAGE);
+    my $mt  = Bio::SUPERSMART::Domain::MarkersAndTaxa->new($alndir, $config->BACKBONE_MIN_COVERAGE);
     my $log = $self->logger;
         
     # Pick the exemplar taxa:
@@ -175,8 +172,12 @@ sub run {
         'outfile'     => $self->outfile, 
         'format'      => $opt->format, 
         'markersfile' => $opt->markersfile, 
-		'taxon_names'       => $opt->names,
-    );
+		'taxon_names' => $opt->names,
+		);
+	
+	# cleanup working directory
+	$self->cleanup_inputdir( $opt->indir );
+	
     $log->info("DONE, results written to $outfile");
     return 1;
 }

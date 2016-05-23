@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use List::MoreUtils 'uniq';
+use File::Spec;
 
 use Bio::Phylo::IO 'parse_tree';
 use Bio::SUPERSMART::Config;
@@ -53,7 +54,7 @@ sub options {
     my ($self, $opt, $args) = @_;
     my $tree_default    = "consensus.nex";
     my $taxa_default    = "species.tsv";
-    my $aln_default     = "aligned.txt";
+    my $aln_default     = "alignments";
     return (
         [
 		     "backbone|b=s", 
@@ -61,8 +62,8 @@ sub options {
 		 { arg => "file", default => $tree_default, galaxy_in => 1, galaxy_type => 'data'}
 		],
         [
-		     "alnfile|a=s", 
-		     "list of file locations of alignments as produced by 'smrt aln'", 
+		     "alndir|a=s", 
+		     "directory with alignments as produced by 'smrt aln'", 
 		     { arg => "file", default => $aln_default, galaxy_in => 1, galaxy_type => 'data'}
 		],
         [
@@ -82,19 +83,20 @@ sub validate {
     my ($self, $opt, $args) = @_;
 
     #  If alignment or taxa file is absent or empty, abort
-    my @files = ( $opt->alnfile, $opt->backbone, $opt->taxafile );
+    my @files = ( $opt->backbone, $opt->taxafile );
     foreach my $file ( @files ){
         $self->usage_error("need alignment and taxa files and backbone tree file") if not $file;
         $self->usage_error("file $file does not exist") unless (-e $file);
         $self->usage_error("file $file is empty") unless (-s $file);
     }
+	$self->usage_error("need alndir") unless $opt->alndir;
 }
 
 sub run{
     my ($self, $opt, $args) = @_;
 
     # collect command-line arguments
-    my $alnfile      = $opt->alnfile;
+	my $alndir = $self->process_inputdir( $opt->alndir );
     my $taxafile     = $opt->taxafile;
     my $backbone     = $opt->backbone;
     my $add_outgroup = $opt->add_outgroups;
@@ -114,12 +116,12 @@ sub run{
 	
     # parse taxon mapping
     $logger->info("Going to read taxa mapping $taxafile");
-    my @taxa = $mt->parse_taxa_file($taxafile);
+    my @taxa = $mt->parse_taxa_file( $taxafile );
 
-    # now read the list of alignments
-    my @alignments = $mt->parse_aln_file( $alnfile );
-
-    # decompose tree into clades and get the sets of species
+    # now read the directory of alignments
+    my @alignments = $mt->parse_aln_dir( $alndir );
+  
+	# decompose tree into clades and get the sets of species
     # extract_clades() returns a list of array references. the map operation results
     # therefore in a list of hash references with a single key, whose value is an array
     # reference, which should contain taxon IDs. XXX however, this is not the case, the
@@ -129,12 +131,9 @@ sub run{
 	
     # get the exemplars
     for my $c ( @clades ) {
-
-    	# dereferencing on the key 'ingroup' should give us a list of taxon IDs.
-    	# XXX it doesn't.
         my @ex = grep { defined $_ } map { $tree->get_by_name($_) } @{ $c->{'ingroup'} };
         $c->{'exemplars'} = [ keys %{{ map { $_->get_name => 1 } @ex }} ];
-    }
+	}
 
     # get one outgroup species for each clade and append to species sets
 	@clades = $self->_add_outgroups( \@clades, \@taxa, \@alignments ) if $add_outgroup;
@@ -252,23 +251,29 @@ sub _add_outgroups {
 	return (@clades);
 }
 
-# writes alignments for a given set of taxa
+# writes alignments for a given set of taxa in a subfolder within the clade
 sub _write_clade_alignments {
 	my ( $clade, $alns, $taxa, $workdir ) = @_;
 
-	if ( not -d "$workdir/clade$clade" ) {
-        mkdir "$workdir/clade$clade";
-	}
+	# make directory to write clade data to
+	my $cladedir = File::Spec->catdir($workdir, "clade$clade");
+	mkdir $cladedir if not -d $cladedir;
 
+	# write all alignemnts to clade directory 
 	my @alignments = @$alns;
 	for my $i (0..$#alignments) {
 		my %aln = %{$alignments[$i]};
-
+		
+		# make alignment directory 
+		my $alndir = File::Spec->catdir($cladedir, 'alignments');
+		mkdir $alndir if not -d $alndir;
+		
 		my $def = (keys %aln)[0];
 		my $seed_gi = $1 if $def =~ /seed_gi\|([0-9]+)/;
 
 		# file name e.g. 12345-clade0.fa
-		open my $fh, '>', "$workdir/clade$clade/$seed_gi-clade$clade.fa" or die $!;
+		my $filename = File::Spec->catfile($alndir, "$seed_gi-clade$clade.fa");
+		open my $fh, '>', $filename or die $!;
 
 		for my $defline( keys %aln ) {
 			my $species = $1 if $defline =~ /taxon\|([0-9]+)/;

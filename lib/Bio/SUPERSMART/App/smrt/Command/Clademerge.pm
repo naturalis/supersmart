@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use List::MoreUtils 'uniq';
+use File::Spec;
 
 use Bio::SUPERSMART::Config;
 use Bio::Phylo::Factory;
@@ -77,10 +78,13 @@ sub run {
 	# merge alignments for each clade, don't include this in the pmap below since
 	# orthologize_cladedir also uses pmap, hence avoid nested pmap calls
 	for my $cladedir ( @dirs ) {
-		my $mergedfile = "${workdir}/${cladedir}/merged.txt";		
-		$mt->orthologize_cladedir( 
-			'dir'=>"${workdir}/${cladedir}", 
-			'outfile'=>$mergedfile, 
+		my $curr_dir = File::Spec->catdir($workdir, $cladedir);
+		my $clusterdir = File::Spec->catdir($cladedir, 'clusters');
+		$self->make_outputdir( $clusterdir );
+		$log->debug("Will write merged alignment clusters to $clusterdir");
+		$mt->orthologize_cladedir(
+			'dir'=> $curr_dir, 
+			'outdir'=>$clusterdir, 
 			'maxdist'=>$config->CLADE_MAX_DISTANCE );
 	}
 	
@@ -88,11 +92,16 @@ sub run {
     my @result = grep { defined $_ and -e $_ } pmap {
 		(my $clade) = @_;
 		my $dir = $clade;
-		if ( -e "${workdir}/${dir}/merged.txt" ) {
-			$mt = Bio::SUPERSMART::Domain::MarkersAndTaxa->new("${workdir}/${dir}/merged.txt", $config->CLADE_MIN_COVERAGE);
+		
+		my $cladedir = File::Spec->catdir($self->workdir, $clade);
+		my $clusterdir = File::Spec->catdir( $cladedir, 'clusters' );
+		
+		# check if we have merged alignments
+		if ( scalar( glob ( "${clusterdir}/*.fa") ) ) {
+			$mt = Bio::SUPERSMART::Domain::MarkersAndTaxa->new($clusterdir, $config->CLADE_MIN_COVERAGE);
 			$mt->write_clade_matrix( 
-				'markersfile' => "${workdir}/${dir}/${clade}-markers.tsv",
-				'outfile' => $opt->outformat eq 'phylip' ? "${workdir}/${dir}/${clade}.phy" : "${workdir}/${dir}/${clade}.xml",
+				'markersfile' => "${cladedir}/${clade}-markers.tsv",
+				'outfile' => $opt->outformat eq 'phylip' ? "${cladedir}/${clade}.phy" : "${cladedir}/${clade}.xml",
 				'max_markers' => $config->CLADE_MAX_COVERAGE,
 				'enrich' => $opt->enrich,
 				'format' => $opt->outformat);

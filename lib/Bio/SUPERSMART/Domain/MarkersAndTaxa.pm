@@ -9,6 +9,7 @@ use Bio::SUPERSMART::Service::MarkersAndTaxaSelector;
 use List::Util qw (min max);
 use List::MoreUtils 'uniq';
 use Data::Dumper;
+use File::Spec;
 use Bio::AlignIO;
 use Bio::SimpleAlign;
 use Bio::LocatableSeq;
@@ -40,9 +41,10 @@ around BUILDARGS => sub {
 		# here we prepare constructor args. first we parse the alignment file list.
 		my $log  = Bio::Phylo::Util::Logger->new;
 		my %args = ( 'logger' => $log );
-		my $alnfile = shift;
-		$args{'alnfiles'} = [ $class->parse_aln_file($alnfile) ];
-		$log->debug("read ".scalar(@{$args{'alnfiles'}})." alignments from $alnfile");
+
+		my $alndir = shift;
+		$args{'alnfiles'} = [ $class->parse_aln_dir($alndir) ];
+		$log->debug("read ".scalar(@{$args{'alnfiles'}})." alignments from $alndir");
 		$args{'min_cover'} = shift;
 
 		# then we parse the alignments
@@ -205,16 +207,18 @@ sub orthologize_cladedir {
 	my ( $self, %args ) = @_;
 
 	my $dir        = $args{'dir'};
-	my $outfile    = $args{'outfile'};
+	my $outdir     = $args{'outdir'};
 	my $maxdist    = $args{'maxdist'};
+
+	my $alndir = File::Spec->catdir($dir, "alignments");
 
 	my $sg = Bio::SUPERSMART::Service::SequenceGetter->new;
 
 	# collect seed gis from alignment file names
-	my @files =  glob("${dir}/*.fa");
+	my @files =  glob("${alndir}/*.fa");
 	my @gis =  grep { $_ ne '' } map {$1 if $_=~/\/([0-9]+)-clade[0-9]+\.fa/ } @files;
 
-	$sg->merge_alignments( $maxdist, $dir, $outfile, @gis );
+	$sg->merge_alignments( $maxdist, $dir, $alndir, $outdir, @gis );
 }
 
 =item write_clade_matrix
@@ -270,8 +274,9 @@ sub write_clade_matrix {
 
 	# pick CLADE_MAX_MARKERS biggest alignments
 	@matrices = sort { $b->get_ntax <=> $a->get_ntax } @matrices;
+	$log->info("Number of matrices : " . scalar(@matrices));
 	if ( scalar(@matrices) > $max_markers ) {
-		$log->info("Found more alignments for clade than CLADE_MAX_MARKERS. Using the first $max_markers largest alignments.");
+		$log->info("Found more alignments for clade than CLADE_MAX_COVERAGE. Using the first $max_markers largest alignments.");
 	}
 
 	# keep track of taxon ids, the number of markers for each taxid,
@@ -519,7 +524,8 @@ sub optimize_packing_order {
 
             # increment coverage count for all taxa in this alignment
             $seen{$_}++ for @{ $taxa_for_alns{$aln} };
-            last ALN if not @alns;
+			$log->debug("Have now " . $seen{$taxon}  . " alignments for taxon $taxon");
+			last ALN if not @alns;
         }
     }
     my @sorted_alignments = sort keys %aln;
@@ -622,20 +628,20 @@ sub query_taxa_table {
 
 =item parse_names_file
 
-Reads a file listing taxon names and returns them in an array 
+Reads a file listing taxon names and returns them in an array
 
 =cut
 
 sub parse_names_file {
     my ( $class, $file ) = @_;
     my $log  = Bio::Phylo::Util::Logger->new;
-    $log->info("going to read taxon names from file $file");	
+    $log->info("going to read taxon names from file $file");
 	my @names;
 
 	# read names from file or STDIN, clean line breaks
 	open my $fh, '<', $file or die $!;
 	while(<$fh>) {
-		
+
 		# strip line breaks and leading/trailing whitespace
 		chomp;
 		s/^\s*//;
@@ -644,7 +650,7 @@ sub parse_names_file {
 	}
 	close $fh;
 	$log->info( "Read " . scalar(@names) . " taxon names from $file" );
-	
+
 	return @names;
 }
 
@@ -652,6 +658,9 @@ sub parse_names_file {
 
 Reads the flat list of alignments, returns an array of validated file names
 (i.e. not empty strings, must be valid locations)
+
+TODO: Deprecated. We are switching to use separate directories instead of listing the
+	  alignment fasta file in a separate file.
 
 =cut
 
@@ -677,6 +686,51 @@ sub parse_aln_file {
         }
     }
     return @alignments;
+}
+
+
+=item extract_seed_gis
+
+Given an array of file names of the form 'XXXXX-XXXXX-XX-subtree.fa',
+extracts the seed_gi from each file, which is by convention the number 
+before the first '-'. Returns an array of seed gis
+
+=cut
+
+sub extract_seed_gis { 
+	my ( $self, @filenames ) = @_;
+	
+	my $log    = Bio::Phylo::Util::Logger->new;
+	$log->debug("Going to extract seed GIs from filenames");
+
+	my @gis;
+	for my $name ( @filenames ) {
+		if ( $name =~ /(\d+)-.+\.fa/ ) {
+			my $gi = $1;
+			push @gis, $gi;
+		}
+	}
+	return @gis;
+}
+
+=item parse_aln_dir
+
+Reads a directory of alignments and returns an array with the file locations.
+Note that alignments need the ending ".fa" in order to be recognised.
+The directory can be a zip file which will then be unzipped.
+
+=cut
+
+sub parse_aln_dir {
+	my ( $self, $dirname ) = @_;
+	my $log    = Bio::Phylo::Util::Logger->new;
+    $log->debug("going to read fasta files in alignment directory '$dirname'" );
+	$log->error("directory $dirname does not exist") if not -d $dirname;
+
+	# extract filenames
+	my @files = glob( "$dirname/*.fa" );
+
+	return @files;
 }
 
 =item parse_user_taxa

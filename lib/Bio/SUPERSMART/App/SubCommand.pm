@@ -27,15 +27,15 @@ All methods below are inherited by child classes.
 
 =item logger
 
-Getter/setter for the subcommand's L<Bio::Phylo::Util::Logger> object, 
-verbosity can be de- or increased by  the argument -v for all subcommands. 
+Getter/setter for the subcommand's L<Bio::Phylo::Util::Logger> object,
+verbosity can be de- or increased by  the argument -v for all subcommands.
 
 =cut
 
 sub logger {
 	my $self = shift;
 	if ( @_ ) {
-		$self->{'logger'} = shift;		
+		$self->{'logger'} = shift;
 	}
 	return $self->{'logger'};
 }
@@ -49,7 +49,7 @@ Getter/Setter the output file name of the subcommand. Returns absolute path.
 sub outfile {
 	my $self = shift;
 	if ( @_ ) {
-		$self->{'outfile'} = $self->absolute_path(shift);		
+		$self->{'outfile'} = $self->absolute_path(shift);
 	}
 	return $self->{'outfile'};
 }
@@ -66,14 +66,116 @@ sub workdir {
 	if ( @_ ) {
 		my $wd = shift;
 		$self->logger->debug ("Setting working directory to $wd" );
-		$self->{'workdir'} = $wd;		
+		$self->{'workdir'} = $wd;
 		if ( !  ( -e $wd && -w $wd ) ) {
-			#$self->logger->fatal ("Working directory $wd does not exist or is not writable") ;		
+			#$self->logger->fatal ("Working directory $wd does not exist or is not writable") ;
 			#exit(1);
 			mkdir $wd or die $!;
 		}
 	}
 	return $self->{'workdir'};
+}
+
+=item process_inputdir
+
+Checks if an input directory is in zip format, if yes, unzips it
+and returns the directory name
+
+=cut 
+
+sub process_inputdir {
+	my ( $self, $dirname ) = @_;
+
+	my $log = $self->logger;
+	# unzip if zipfile is given
+	if ( $dirname =~ /(.+)\.zip$/ ) {
+		$log->debug("$dirname seems to be zip archive, attempting to unzip");
+		my $cmd = "unzip -q -o $dirname";
+		$log->debug("Running command $cmd");
+		system ( $cmd ) and die $!;
+		$dirname = $1;
+	}
+	$dirname = File::Spec->catdir( $self->workdir, $dirname );
+	return $dirname;
+}
+
+=item cleanup_inputdir
+
+Checks if input directory is a zip file, and if
+the unzipped archive exists, deletes it. This 
+makes sure that after execution of the subcommand, 
+there exists no zipfile and directory with the same content.
+
+=cut
+
+sub cleanup_inputdir {
+	my ( $self, $inputname ) = @_;
+	
+	my $log = $self->logger;
+
+	# delete outputdir only if input was zipfile
+	if ( $inputname =~ /(.+)\.zip$/ ) {
+		my $dirname = File::Spec->catdir( $self->workdir, $1 );
+		my $cmd = "rm -rf $dirname";
+		$log->debug("Running command $cmd");
+		system ( $cmd ) and die $!;
+	}
+	
+}
+
+=item make_outputdir
+
+Creates output directory (if not already existant) and returns its name
+
+=cut
+
+sub make_outputdir {
+	my ( $self, $dirname ) = @_;
+	my $log = $self->logger;
+	
+	my $dir = $dirname;
+
+	if ( ! File::Spec->file_name_is_absolute($dir) ) {
+		$dir = File::Spec->catdir( $self->workdir, $dir );
+	}
+	if ( -d $dir ) {
+		$log->info("Output directory $dir already exists");
+	}
+	else {
+		$log->info("Creating output directory $dir");
+		mkdir $dir or die $! if not -e $dir;
+	}
+	return $dir;
+}
+
+
+
+#sub cleanup_outputdir {
+	
+#}
+
+=item zip_outputdir
+
+Creates a zipfile of the output directory,
+having by default <name of the directory>.zip.
+Returns the filename
+
+=cut
+
+sub zip_outputdir {
+	my ( $self, $dirname ) = @_;
+
+	my $log = $self->logger;
+
+	$log->fatal("Directory $dirname does not exist") if ! -d $dirname;
+
+	my $zipfilename = $dirname . ".zip";
+	$log->info("Creating archive file $zipfilename from directory $dirname");
+	my $cmd = "zip -r -q -m $zipfilename $dirname";
+	$log->debug("Running command $cmd");
+	system ( $cmd ) and die $!;
+
+	return $zipfilename;
 }
 
 =item config
@@ -102,18 +204,18 @@ sub absolute_path {
 	my $self = shift;
 	my $filename = shift;
 	if (not $filename =~ /\//) {
-		if ( my $wd = $self->workdir ) {	
+		if ( my $wd = $self->workdir ) {
 			$filename = $filename =~ /^\// ? $filename : $wd . "/" . $filename;
 		} else {
 			$self->logger->warn("no working directory specified, using relative paths ")
 		}
 	}
-	return $filename; 
+	return $filename;
 }
 
 =item execute
 
-Overrides the default classes' 'execute' method such that some global properties 
+Overrides the default classes' 'execute' method such that some global properties
 for all subcommands (e.g. verbosity level, ...) can be set in this method. The
 method then calls the 'run' subroutine, which must be implemented for all child classes
 
@@ -123,15 +225,15 @@ sub execute {
 	my ($class, $opt, $args) = @_;
 	my $c = Bio::SUPERSMART::Config->new;
 	$class->logger->info("This is SUPERSMART release " . $c->RELEASE);
-	
-	my $result = $class->run( $opt, $args );	
+
+	my $result = $class->run( $opt, $args );
 	close $logfh;
 	return $result;
 }
 
 =item init
 
-The init subroutine initializes objects that are shared by all subcommands (as for instance the working 
+The init subroutine initializes objects that are shared by all subcommands (as for instance the working
 directory, output file and a L<Bio::Phylo::Util::Logger> instance). Also, we check for command line options that require a file argument
 and, if necessary, turn their paths into absolute paths.
 
@@ -141,55 +243,55 @@ sub init {
 	my ($self, $opt, $args) = @_;
 	my $verbosity = INFO;
 	$verbosity += $opt->verbose ? $opt->verbose : 0;
- 
+
  	# create logger object with user-defined verbosity
 	$self->logger( Bio::Phylo::Util::Logger->new(
 		'-level' => $verbosity,
 		'-style' => $opt->logstyle,
-		'-class' => [ 
-		    ref( $self ), 
-		    'Bio::SUPERSMART::App::SubCommand', 
-		    'Bio::SUPERSMART::Domain::MarkersAndTaxa', 
-		    'Bio::SUPERSMART::Service::ParallelService', 
-		    'Bio::SUPERSMART::Service::TreeService', 
-		    'Bio::SUPERSMART::Service::CalibrationService',
-		    'Bio::SUPERSMART::Service::SequenceGetter',
-		    'Bio::SUPERSMART::Service::MarkersAndTaxaSelector',
-		    'Bio::SUPERSMART::Service::DecorationService',
-		    'Bio::Tools::Run::Phylo::ExaML',
-		    'Bio::Tools::Run::Phylo::ExaBayes',
-		    'Bio::Tools::Run::Phylo::StarBEAST',
-		],		
-	));
-   
+		'-class' => [
+			ref( $self ),
+			'Bio::SUPERSMART::App::SubCommand',
+			'Bio::SUPERSMART::Domain::MarkersAndTaxa',
+			'Bio::SUPERSMART::Service::ParallelService',
+			'Bio::SUPERSMART::Service::TreeService',
+			'Bio::SUPERSMART::Service::CalibrationService',
+			'Bio::SUPERSMART::Service::SequenceGetter',
+			'Bio::SUPERSMART::Service::MarkersAndTaxaSelector',
+			'Bio::SUPERSMART::Service::DecorationService',
+			'Bio::Tools::Run::Phylo::ExaML',
+			'Bio::Tools::Run::Phylo::ExaBayes',
+			'Bio::Tools::Run::Phylo::StarBEAST',
+		],
+    ));
+
 	# set working directory
 	my $wd = $opt->workdir || '.';
 	$self->workdir($wd);
 
-	# loop through options to see which ones are file options; 
+	# loop through options to see which ones are file options;
 	# set absolute path for all filenames given
 	my %file_opts = map { (my $optname= $_->[0])=~s/\|.+//g; $_->[2]->{'arg'} eq 'file' ? ($optname=>1) : () } $self->options;
 	$file_opts{'logfile'} = 1;
 	for my $given_opt ( keys %$opt ) {
 		if ( exists $file_opts{$given_opt} ) {
-			my $new_filename = 
+			my $new_filename =
 			$opt->{$given_opt} = $self->absolute_path($opt->{$given_opt});
-		}		
+		}
 	}
-	
+
  	# set outfile name
 	if ( my $of = eval { $opt->outfile } ) {
 		$self->outfile($of);
 	}
-     
+
     # create config object
     $self->config( Bio::SUPERSMART::Config->new );
-    
+
     # redirect logger output to file if specified by command call
     if ( my $logfile = $opt->logfile ) {
     	open $logfh, '>', $logfile or die $!;
 		$self->logger->set_listeners(sub{$logfh->print(shift)});
-    } 
+    }
 }
 
 =item opt_spec
@@ -198,7 +300,7 @@ Speciefies the global options for the smrt command. This subroutine will
 also call the 'options' for the child classes to capture also the
 subcommand specific options.
 
-=cut 
+=cut
 
 sub opt_spec {
 	my ($class, $app) = @_;
@@ -208,16 +310,16 @@ sub opt_spec {
 		[ "help|h", "display help screen", { urgency => 'super' } ],
 		[ "verbose|v+", "increase verbosity level", { urgency => 'super' } ],
 		[ "workdir|w=s", "directory in which results and intermediate files are stored", { arg => "dir", urgency => 'super' } ],
-		[ "logfile|l=s", "write run-time information to logfile", 
-		  { arg => "file", urgency => 'super', galaxy_out => 1, galaxy_label => "logfile-${subcommand}", galaxy_type => 'text'}],	
+		[ "logfile|l=s", "write run-time information to logfile",
+		  { arg => "file", urgency => 'super', galaxy_out => 1, galaxy_label => "logfile-${subcommand}", galaxy_type => 'text'}],
 		[ "logstyle|y=s", "toggles logging style between 'simple' and 'detailed'", { default => "simple", urgency => 'super' }],
-	);	
+	);
 }
 
 =item description
 
-Returns the description for a specific subcommand. This method is invoked by 
-the child classes when the global option 'help' is used, e.g. in 
+Returns the description for a specific subcommand. This method is invoked by
+the child classes when the global option 'help' is used, e.g. in
 $ smrt help subcommand
 The actual description of the subcommand is parsed from its DESCRIPTION field
 in the POD documentation.
@@ -229,11 +331,11 @@ sub description {
 
 	# classname to filename
   	my $pm_file = $class;
-  	$pm_file =~ s/::/\//g; 
-  	$pm_file =~ s/=.*//g;   	
+  	$pm_file =~ s/::/\//g;
+  	$pm_file =~ s/=.*//g;
   	$pm_file .= '.pm';
   	$pm_file = $INC{$pm_file} or return "(unknown)";
-	
+
   	# if the pm file exists, open it and parse it
   	open my $fh, "<", $pm_file or return "(unknown)";
 	my $seen;
@@ -261,7 +363,7 @@ sub description {
 
 =item validate_args
 
-Overrides the default method mainly for one reason: There are two ways of 
+Overrides the default method mainly for one reason: There are two ways of
 displaying the help screen: One is '$ smrt help command', the other is
 '$ smrt command -h'. Here we make the latter to behave exactly as
 the former.
@@ -269,21 +371,21 @@ the former.
 =cut
 
 sub validate_args {
-	my ($class, $opt, $args) = @_;		
-	
+	my ($class, $opt, $args) = @_;
+
 	# first init the properties of the superclass
 	$class->init($opt, $args);
-			
+
 	if ($opt->help){
 
-		# This is a small hack to make the help screen called with the 
+		# This is a small hack to make the help screen called with the
 		#  option (as here, e.g. "$ smrt command -h" ) look the same
-		#  as when we call "$ smrt help command"  				
-		my ($cmd) = $class->app->prepare_command("help"); 
+		#  as when we call "$ smrt help command"
+		my ($cmd) = $class->app->prepare_command("help");
 		my @name = ($class->command_names);
 		$cmd->execute($opt, \@name);
 		exit;
-	} 
+	}
 	else {
 		$class->validate($opt, $args);
 	}
@@ -291,20 +393,20 @@ sub validate_args {
 
 =item usage_desc
 
-Overrides the method from L<App::Cmd> to compile a custom 'usage' 
-string for a given subcommand with options and arguments 
-of the form 'smrt subcommand option1 <arg1> [option2 <arg2>] [option3]'.  
+Overrides the method from L<App::Cmd> to compile a custom 'usage'
+string for a given subcommand with options and arguments
+of the form 'smrt subcommand option1 <arg1> [option2 <arg2>] [option3]'.
 Options that require arguments followed by the argument name enclosed in '<>'.
-Options that are not mandatory are enclosed in []. 
+Options that are not mandatory are enclosed in [].
 
-=cut 
+=cut
 
 sub usage_desc {
-	my ($class, $opt, $args) = @_;	
-	my $cmd = $class->command_names;	
-	my @opts = $class->opt_spec;			
+	my ($class, $opt, $args) = @_;
+	my $cmd = $class->command_names;
+	my @opts = $class->opt_spec;
 	my $usage = "%c $cmd ";
-		
+
 	# build custom usage string (default was "%c $cmd %o" )
 	my @args = ( '' );
 	@opts = sort { ( $a->[2]->{urgency} eq 'super' ) <=> ( $b->[2]->{urgency} eq 'super' ) } @opts;
@@ -316,7 +418,7 @@ sub usage_desc {
 		my $arg      = $h{'arg'};
 		my $opt_str  = "-$short_opt";
 		$opt_str    .= $arg ? " <$arg>"  :"";
-		$opt_str     = !$required ? "[$opt_str] " : " $opt_str ";		
+		$opt_str     = !$required ? "[$opt_str] " : " $opt_str ";
 
 		# encode colored
 		if ( $h{'urgency'} =~ /super/ ) {
@@ -334,7 +436,7 @@ sub usage_desc {
 			push @args, '';
 		}
 	}
-	return $usage . join( "\\\n\t", grep { /\S/ } @args );	
+	return $usage . join( "\\\n\t", grep { /\S/ } @args );
 }
 
 =item usage_error

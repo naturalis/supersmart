@@ -1293,14 +1293,17 @@ all-versus-all blast searching with subsequent profile alignment.
 =cut
 
 sub merge_alignments {
-	my ( $self, $maxdist, $workdir, $outfile, @seed_gis) = @_;
+	my ( $self, $maxdist, $workdir, $indir, $outdir, @seed_gis) = @_;
 
 	my $log = $self->logger;	
 	
 	# blast and cluster the seed GIs
 	$log->info("Going to cluster ".scalar(@seed_gis)." seed GIs, max distance : $maxdist");
-	my $dbpath   = File::Spec->catfile($workdir,'seeds.fa');
-	my $dbname   = $self->make_blast_db($dbpath,@seed_gis);	
+	my $dbdir    = File::Spec->catdir($outdir, "db-files");
+	mkdir $dbdir if not -d $dbdir;
+	my $dbfile   = File::Spec->catfile($dbdir,'seeds.fa');
+
+	my $dbname   = $self->make_blast_db($dbfile,@seed_gis);	
 	my $report   = $self->run_blast_all($dbname);
 	my @clusters = $self->cluster_blast_results($report);
 
@@ -1309,28 +1312,14 @@ sub merge_alignments {
 		my ($clref) = @_; 
 		my $id      = $clref->{'id'};
 		my @seed_gis     = @{ $clref->{'seq'} };
-		my $merged  = File::Spec->catfile( $workdir, "cluster${id}.fa" );
+		my $merged  = File::Spec->catfile( $outdir, "cluster${id}.fa" );
 		
 		# turn GIs into file names 
-		my @files = map { glob ( "$workdir/" .  $_ . "*.fa" ) } @seed_gis;
-
+		my @files = map { glob ( "$indir/" .  $_ . "*.fa" ) } @seed_gis;
 		# profile align files to merge as many as possible
 		$self->profile_align_all( $merged, $maxdist, @files );
-
 		return $merged;
-	} @clusters;
-	
-	$log->info("Listing merged files in $outfile");
-
-	# remove previous outfile, if exists
-	unlink $outfile if -e $outfile;
-	for my $merged ( @merged_files ) {
-		if ( -s $merged ) {	
-			open my $outfh, '>>', $outfile or die $!;
-			print $outfh $merged, "\n";
-			close $outfh;
-		}
-	}
+	} @clusters;	
 }
 
 sub _temp_fasta {

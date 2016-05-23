@@ -32,16 +32,17 @@ smrt align [-h ] [-v ] [-w <dir>] -i <file> [-o <file>]
 
 Given an input table of resolved taxa, performs multiple sequence alignment 
 of all potentially useful PhyLoTA clusters for the taxa of interest. 
-Produces a list of aligned candidate clusters. The alignment method 
-can be configured, effective methods include those provided by muscle and mafft.
+Alignments will be stored in an output directory, given via the '--dirname' argument, 
+with default 'alignments/' in the current workind directory
 
 =cut
 
 sub options {
     
     my ($self, $opt, $args) = @_;       
-    my $outfile_default = "aligned.txt";
-    my $taxa_default = "species.tsv";
+    my $taxa_default = 'species.tsv';
+	my $outdir_default = 'alignments';
+	
     return (
 		[
 		 "infile|i=s", 
@@ -49,14 +50,13 @@ sub options {
 		 { arg => "file", default => $taxa_default, galaxy_in => 1, galaxy_format => 'tabular', galaxy_type => "data", galaxy_label => 'taxa file' }
 		],
 		[
-		 "outfile|o=s", 
-		 "name of the output file, defaults to '$outfile_default'", 
-		 {default => $outfile_default, arg => "file", galaxy_out => 1, galaxy_format => 'tabular', galaxy_type => "data", galaxy_label => 'alignments' }
-		],   
+		 "outdir|o=s", 
+		 "write alignments to specified directory name, defaults to $outdir_default", 
+		 { arg => "dir", default => $outdir_default }
+		],
 		[
-		 "dirname|d=s", 
-		 "write alignments to specified directory name, if not given, alignments are written to working directory", 
-		 { arg => "dir" }
+		 "zip|z", 
+		 "zip output alignment directory",
 		]
     );  
 }
@@ -68,15 +68,7 @@ sub validate {
     my $file = $opt->infile;
     $self->usage_error("no infile argument given") if not $file;
     $self->usage_error("file $file does not exist") unless (-e $file);
-    $self->usage_error("file $file is empty") unless (-s $file);
-    
-    # Outfile must be empty because we will append to it
-    my $outfile = $opt->outfile;
-    if ( -e $outfile and -s $outfile ) {
-        $self->logger->warn("$outfile is not empty. Will overwrite.");
-        open my $outfh, '>', $outfile or die $!;
-        close $outfh;       
-    }   
+    $self->usage_error("file $file is empty") unless (-s $file);    
 }
 
 sub run {
@@ -84,10 +76,9 @@ sub run {
     
     # collect command-line arguments
     my $infile  = $opt->infile;
-    my $outfile = $opt->outfile;
     
     # create directory for alignments if specified in argument
-    my $dir = $self->outputdir($opt->dirname);  
+    my $dir = $self->make_outputdir($opt->outdir);  
     
     # instantiate helper objects
     my $log = $self->logger;
@@ -160,62 +151,15 @@ sub run {
         # align to file
         my $filename = File::Spec->catfile( $dir, $clinfo.'.fa' );      
         $sg->align_to_file( $seqs{$clinfo} => $filename );         
-	$filename;
-        
+		$filename;
+     
     } @clinfos;
     
-    # write aligned files to output list
-    for my $filename ( sort @result ) {
-	    if ( -s $filename ) {
-		    $log->info("Have alignment file: $filename");
-		    open my $outfh, '>>', $outfile or die $!;
-		    print $outfh $filename . "\n";
-		    close $outfh;
-	    }	    
-    }
+	my $output = $opt->zip ? $self->zip_outputdir($dir) : $dir;
 
-    $log->info("DONE, results written to $outfile");    
+    $log->info("DONE, results written to $output.");    
     
     return 1;
 }
-
-=over
-
-=item outputdir
-
-Creates output folder if argument folder name is provided.
-
-=cut
-
-sub outputdir {
-    my ( $self, $dirname ) = @_;
-    my $log = $self->logger;
-    
-    # create directory for alignments if specified in argument
-    my $dir;
-    if ( my $alndir = $dirname ) {
-        
-        # is absolute
-        if ( $alndir =~ /^\// ) {
-            $dir = $alndir . '/';
-        }
-        
-        # relative
-        else {
-            $dir = $self->workdir . '/' . $alndir . '/'; 
-        }
-        $log->info("creating directory $dir");
-        mkdir $dir or die $! if not -e $dir;  
-    }
-    else {
-        $dir = $self->workdir . '/'; 
-    }
-    $log->debug("directory to save alignments in : $dir");
-    return $dir;
-}
-
-=back
-
-=cut
     
 1;
