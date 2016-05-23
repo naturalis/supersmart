@@ -124,7 +124,6 @@ sub run {
 	elsif ( my $treefile = $opt->outgroup_tree ) {
 		$outgroup = $self->_get_smallest_outgroup( $treefile );
 	}
-	
 	# prepare taxa data
 	my @records = $mt->parse_taxa_file($taxafile);
 		
@@ -154,13 +153,13 @@ sub run {
 		# Perform rerooting at outgroup, if given		
 		if ( $outgroup ) {			
 			my @ranks = ('forma', 'varietas', 'subspecies', 'species');	
-			$log->debug("Rerooting at outgroup $outgroup");
+			$log->debug('Rerooting at outgroup with id(s) ' . join(',', @{$outgroup}));
 			$ts->outgroup_root(
 				'-tree'     => $tree,
 				'-ids'      => $outgroup,
 				'-ranks'    => \@ranks,
 				'-records'  => \@records,
-				);		
+				);
 		} 
 		
 		# Try to minimize paraphyly if no outgroup given
@@ -175,14 +174,13 @@ sub run {
 			$log->debug("smoothing out diff between left and right tip heights");
 			$ts->smooth_basal_split($tree);
 		}
-		
+  
 		# clean up labels and map to taxon names
 		$tree = $ts->remap($tree, %ti_to_name);
 		$ts->remove_internal_names($tree);
         $log->info("Rerooted backbone tree");
-		
 		$tree->ultrametricize if $opt->ultrametricize;
-
+		
 		return $tree; 
 
 	} @trees;
@@ -191,7 +189,7 @@ sub run {
 
 	# write output file
 	my $forest_rerooted = $fac->create_forest;
-	$forest->insert( @trees );
+	$forest->insert( @rerooted_trees );
 	$ts->to_file( '-file' => $outfile, '-tree' => $forest );
 	
 	$log->info("DONE, results written to $outfile");		
