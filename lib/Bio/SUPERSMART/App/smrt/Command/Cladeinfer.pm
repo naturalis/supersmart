@@ -282,16 +282,17 @@ sub run {
 	# set outgroup if present 
 	$self->set_outgroup( $beast, $stem );
 	
-        # set input file
-        $logger->info("Setting beast input file name to ${stem}-beast-in.xml");
-        $beast->beastfile_name( "${stem}-beast-in.xml" );
+	# set input file
+    $logger->info("Setting beast input file name to ${stem}-beast-in.xml");
+    $beast->beastfile_name( "${stem}-beast-in.xml" );
 
 	# all cores are available for BEAST
 	$beast->beagle_instances( $config->NODES );
-        
+	$beast->threads( $config->nodes );
+    
 	# run BEAST
 	$beast->run( $file );
-        $logger->info("Done. Trees are in ${file}.nex, BEAST log in ${file}.log");
+    $logger->info("Done. Trees are in ${file}.nex, BEAST log in ${file}.log");
         
 	# concatenate 
 	if ( $opt->append ) {
@@ -339,6 +340,7 @@ sub run {
 		if ( $config->NODES > scalar(@cladedirs) ) {
 		    my $instances = int( $config->NODES / scalar(@cladedirs) );
 		    $beast->beagle_instances( $instances );
+		    $beast->threads( $instances );
 		}
                 $beast->run( $file );
                 

@@ -28,6 +28,7 @@ our @beast_PARAMS = (
 	'beagle_scaling',   # specify scaling scheme to use
 	'beagle_rescale',   # frequency of rescaling (dynamic scaling only)	
 	'beagle_instances', # divide site patterns amongst instances	
+	'threads',          # set/limit number of threads for likelihood calculation 
 );
 our @beast_SWITCHES = (
 	'verbose',          # Give verbose XML parsing messages
@@ -93,6 +94,7 @@ value:
 	'-beagle_scaling',   # specify scaling scheme to use
 	'-beagle_rescale',   # frequency of rescaling (dynamic scaling only)	
 	'-beagle_instances', # divide site patterns amongst instances	
+    '-threads',          # threads for likelihood calculation
 
 In addition, the following named arguments that require a boolean are available:
 
