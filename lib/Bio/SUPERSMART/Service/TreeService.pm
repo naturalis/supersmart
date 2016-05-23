@@ -46,11 +46,15 @@ sub to_file {
 	my ( $self, %args ) = @_;
 	
 	my $file = $args{'-file'} or throw 'BadArgs' => "Need -file argument";
-	my $tree = $args{'-tree'} or throw 'BadArgs' => "Need -tree argument";
+	my $string = $args{'-string'};
+	my $tree = $args{'-tree'};
 	my $format = $args{'-format'} || 'newick';
 
+	throw 'BadArgs' => "Need -tree or -string argument" if not $tree and not $string;
+	$string = $self->to_string( $tree, $format ) if not $string;
+   
 	open my $fh, '>', $file or die $!;
-	print $fh $self->to_string( $tree, $format );
+	print $fh $string;
 	close $fh;
 	
 	$log->info("Wrote tree in $format format to file $file.");
@@ -145,7 +149,7 @@ sub _detect_treeformat {
 			$tree = parse_tree(
 				'-file'   => $file,
 				'-format' => $f,
-				);				
+				);
 		};
 			if ( $tree ) {
 				$log->info("Detected tree format $f");

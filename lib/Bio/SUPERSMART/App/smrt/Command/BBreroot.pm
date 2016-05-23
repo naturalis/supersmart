@@ -114,7 +114,6 @@ sub run {
 	my $mt  = Bio::SUPERSMART::Domain::MarkersAndTaxa->new;
 	my $mts = Bio::SUPERSMART::Service::MarkersAndTaxaSelector->new;
 	my $log = $self->logger;
-	my $fac = Bio::Phylo::Factory->new;
 	
 	# identify outgroup once
 	my $outgroup;
@@ -136,7 +135,7 @@ sub run {
 	my %name_to_ti;
 
 	# reroot input trees in parallel
-	my @rerooted_trees = pmap{	
+	my @treestrs = pmap{	
 		my $tree = $_;
 		
 		# create id mapping table
@@ -176,21 +175,20 @@ sub run {
 		}
   
 		# clean up labels and map to taxon names
-		$tree = $ts->remap($tree, %ti_to_name);
+		$ts->remap($tree, %ti_to_name);
 		$ts->remove_internal_names($tree);
         $log->info("Rerooted backbone tree");
 		$tree->ultrametricize if $opt->ultrametricize;
-		
-		return $tree; 
+
+		## TODO when doing return($tree), the node order gets messed up again... Why?  
+		return ($tree->to_newick); 
 
 	} @trees;
 	
-	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@trees) != scalar(@rerooted_trees);
+	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@trees) != scalar(@treestrs);
 
 	# write output file
-	my $forest_rerooted = $fac->create_forest;
-	$forest->insert( @rerooted_trees );
-	$ts->to_file( '-file' => $outfile, '-tree' => $forest );
+	$ts->to_file( '-file' => $outfile, '-string' => join("\n", @treestrs) );
 	
 	$log->info("DONE, results written to $outfile");		
 }
