@@ -362,7 +362,11 @@ class install {
 	  require => Exec['install_r_ape'];
 	"install_r_phangorn":		
 	  command => "echo 'install.packages(\"phangorn\",repos=\"${cran_url}\")' | R --vanilla",		
-	  require => Exec['install_r_ape'];    
+	  require => Exec['install_r_ape'];
+    "install_r_speciesgeocoder":		
+	  command => "echo 'install.packages(\"speciesgeocodeR\",repos=\"${cran_url}\")' | R --vanilla",		
+	  require => Exec['r-base', 'r-base-dev'];    
+
   }
 
   # the Travis continuous integration system has special templates for testing different
