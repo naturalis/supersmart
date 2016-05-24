@@ -365,7 +365,7 @@ class install {
 	  require => Exec['install_r_ape'];
     "install_r_speciesgeocoder":		
 	  command => "echo 'install.packages(\"speciesgeocodeR\",repos=\"${cran_url}\")' | R --vanilla",		
-	  require => Exec['r-base', 'r-base-dev'];    
+	  require => Package['r-base', 'r-base-dev'];    
 
   }
 
