@@ -111,7 +111,7 @@ sub run{
 
     # parse backbone tree
     $logger->info("Going to read backbone tree $backbone");
-    my $tree = $ts->read_tree( '-file'   => $backbone );	
+    (my $tree) = $ts->read_tree( '-file'   => $backbone );	
     $ts->remap_to_ti($tree);
 	
     # parse taxon mapping

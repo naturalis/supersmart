@@ -49,8 +49,8 @@ sub run {
 	my $logger = $self->logger;      	
 	my $ts = Bio::SUPERSMART::Service::TreeService->new; 	
 
-	my $tree = $ts->read_tree( '-file'=>$opt->tree );
-	$ts->to_file( '-tree'=>$tree, '-format'=>$opt->format, '-file'=>$opt->outfile);
+	my @trees = $ts->read_tree( '-file'=>$opt->tree );
+	$ts->to_file( '-tree'=>\@trees, '-format'=>$opt->format, '-file'=>$opt->outfile);
 	
 	$logger->info("DONE, tree written to " . $opt->outfile);
 	

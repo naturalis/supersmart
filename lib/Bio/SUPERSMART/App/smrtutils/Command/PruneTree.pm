@@ -67,7 +67,7 @@ sub run {
 	my $ts = Bio::SUPERSMART::Service::TreeService->new;
 	my $mts = Bio::SUPERSMART::Service::MarkersAndTaxaSelector->new;
 
-	my $tree = $ts->read_tree( '-file' => $treefile, '-format' => $opt->format );
+	(my $tree) = $ts->read_tree( '-file' => $treefile, '-format' => $opt->format );
 	my $ntax_initial = $tree->get_ntax;
 
 	if ( $taxa ) {

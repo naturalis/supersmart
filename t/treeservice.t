@@ -14,24 +14,44 @@ BEGIN { use_ok('Bio::SUPERSMART::Service::TreeService'); }
 my $ts = new_ok('Bio::SUPERSMART::Service::TreeService');
 my $conf = Bio::SUPERSMART::Config->new;
 
-my $tf = $Bin . '/testdata/testtree.dnd';
-my $tree = parse_tree(
-	'-file'   => $tf,
-	'-format' => 'newick',
-	'-as_project' => 1,
-);
 
-my $taxa = $Bin . '/testdata/species.tsv';
+# test reading trees
+
+# newick format, explicitly specified and autodetect
+my $tf = $Bin . '/testdata/testtree.dnd';
+(my $tree) = $ts->read_tree( '-file' => $tf, '-format' => 'newick' );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+($tree) = $ts->read_tree( '-file' => $tf );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+
+# nexus (pure) format, explicitly specified and autodetect
+$tf = $Bin . '/testdata/nexus.nex';
+($tree) = $ts->read_tree( '-file' => $tf, '-format' => 'nexus' );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+($tree) = $ts->read_tree( '-file' => $tf );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+
+# figtree nexus format, explicitly specified and autodetect
+$tf = $Bin . '/testdata/consensus.nex';
+($tree) = $ts->read_tree( '-file' => $tf, '-format' => 'figtree' );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+($tree) = $ts->read_tree( '-file' => $tf );
+isa_ok ( $tree, 'Bio::Phylo::Forest::Tree');
+
+# parse multiple trees to array
+$tf = $Bin . '/testdata/piperaceae-backbone.dnd';
+my @trees = $ts->read_tree( '-file' => $tf, '-format' => 'newick' );
+for ( @trees ) {
+	isa_ok( $_,  'Bio::Phylo::Forest::Tree');
+}
+
 # parse taxon mapping
+my $taxa = $Bin . '/testdata/species.tsv';
 my $mt = 'Bio::SUPERSMART::Domain::MarkersAndTaxa';
 my @records = $mt->parse_taxa_file($taxa);
 
 $tf = $Bin . '/testdata/tree-not-rerooted.dnd';
-$tree = parse_tree(
-	'-file'   => $tf,
-	'-format' => 'newick',
-	'-as_project' => 1,
-);
+($tree) = $ts->read_tree( '-file'   => $tf, '-format' => 'newick');
 
 # test rerooting a tree
 my $rerooted = $ts->reroot_tree($tree, \@records, ["suborder"]);
@@ -56,7 +76,7 @@ isa_ok( $cladetree,'Bio::Phylo::Forest::Tree' );
 
 # parse the backbone tree
 my $bbfile = "$Bin/testdata/backbone-consensus.nex";
-my $bbtree = $ts->read_figtree( '-file' => $bbfile );
+(my $bbtree) = $ts->read_figtree( '-file' => $bbfile );
 
 # graft clade onto backbone tree
 my $nof_terminals = scalar(@{$bbtree->get_terminals});
@@ -68,10 +88,6 @@ ok (scalar(@{$grafted->get_terminals}) > $nof_terminals, "tree has more terminal
 
 # test remapping a tree back to taxon identifiers 
 my $newick = "((('Echinochloa_crus-galli',Echinochloa_colona),Echinochloa_stagnina),(Panicum_turgidum, \"x_Brassolaeliocattleya_'Sung_Ya_Green'\"));";
-$tree = parse_tree(
-	'-string'   => $newick,
-	'-format' => 'newick',
-	'-as_project' => 1,
-    );
+($tree) = $ts->read_tree( '-string' => $newick, '-format' => 'newick' );
 my $remapped = $ts->remap_to_ti($tree);
 isa_ok ($remapped, 'Bio::Phylo::Forest::Tree');

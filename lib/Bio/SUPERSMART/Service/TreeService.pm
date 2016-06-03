@@ -37,7 +37,7 @@ clade trees onto a backbone tree.
 Writes a tree object to file.
 
  -file => filename
- -tree => tree object
+ -tree => tree object or arrayref of tree objects
  -format => output format, newick, nexus or figtree, defaults to newick
 
 =cut
@@ -69,34 +69,39 @@ Returns the string representation of a tree in the specified format
 
 sub to_string {
 	my ( $self, $tree, $format ) = @_;
-	
-	# create output
-	my $project = $fac->create_project;
 
-	# input can be tree or forest, 
-	# create forest object if input is tree
-	my $forest = $tree;
-	if ( ! $forest->can('make_taxa') ) {
-		$log->debug("Creating forest object");
-		$forest  = $fac->create_forest;
+	my $fac = Bio::Phylo::Factory->new;
+	my $forest = $fac->create_forest;
+	
+	# either one tree is provided or an arrayref of trees
+	if ( ref($tree) ) {
+		$forest->insert($_) for @{$tree};
+	}
+	else {
 		$forest->insert($tree);	
 	}
 	
+	# create output
+	my $project = $fac->create_project;
 	my $taxa = $forest->make_taxa;
 	$project->insert($taxa);
 	$project->insert($forest);
+
 	my $string = unparse(
 		'-format' => $format,
 		'-phylo'  => $project,
 	    );
+
 	return $string;
 }
 
 =item read_tree
 
-Reads a phylogenetic tree from file, detects format if not given as argument
+Reads phylogenetic tree(s) from file, detects format if not given as argument,
+returns an array with trees
 
  -file => filename
+ -string => tree string
  -format => format
 
 =cut 
@@ -104,59 +109,46 @@ Reads a phylogenetic tree from file, detects format if not given as argument
 sub read_tree {
 	my ( $self, %args ) = @_;
 	
-	# tree or forest that will get returned
-	my $ret;
-	
-	my $file = $args{'-file'} or throw 'BadArgs' => "Need -file argument";
+	my $file = $args{'-file'}; 
 	my $format = $args{'-format'} || $self->_detect_treeformat( $file );
+	my $string = $args{'-string'};
 	
-	my $project = parse(
-		'-file'   => $file,
-		'-format' => $format,
-		'-as_project' => 1 );
+	throw 'BadArgs' => "Need -file or -string argument" if not $file and not $string;
 	
-	my @trees = @{ $project->get_items( _TREE_ ) };
+	my %parse_args = %args;
+	$parse_args{'-as_project'} = 1;
+	$parse_args{'-format'} = $format;
+	my $project = parse(%parse_args);
 
-	# If one tree is in the file, return a Bio::Phylo::Forest::Tree,
-	# otherwise a Bio::Phylo::Forest object
+	my @trees = @{ $project->get_items( _TREE_ ) };
+	
 	if ( ! scalar( @trees) ) {
 		$log->fatal("Could not parse tree(s) in file $file");
 	}
-	if ( scalar( @trees ) == 1 ) {
-		$log->info("Found one tree in file $file");
-		$ret = $trees[0];
-	}
-	else {
-		$log->info("Found "  . scalar( @trees) . " trees in file $file");
-		$log->debug("Returning a Bio::Phylo::Forest object");
-		my @forest = @{ $project->get_items( _FOREST_ ) };
-		$ret = $forest[0];
-	}	
-	return $ret;
+	return @trees;
 }
 
 sub _detect_treeformat {
 	my ($self, $file) = @_;
 	
 	my $format;   
-	
-	my @formats = qw(figtree nexus newick);		
 	$log->info("Detecting format of tree $file");
-	for my $f ( @formats ) {
-		$log->info("Checking if file is in $f format");
-		my $tree;
-		eval { 
-			$tree = parse_tree(
-				'-file'   => $file,
-				'-format' => $f,
-				);
-		};
-			if ( $tree ) {
-				$log->info("Detected tree format $f");
-				$format = $f;
-				last;		
-			}									
+	open my $fh, '<', $file;
+	
+	if ( grep {/#NEXUS/} <$fh> ) {
+		if ( grep {/FigTree/} <$fh> ) {
+			$format = 'figtree';
+		}
+		else {
+			$format = 'nexus';
+		}
+		$log->info("Detected $format format");
 	}
+	else {
+		$format = 'newick';
+		$log->info("File not in nexus or figtree format; assuming newick format");
+	}
+
 	return $format;
 }
 	
@@ -234,7 +226,7 @@ sub reroot_tree {
 		if ( my $node = $internals[$i] ) {
 			$log->debug("rerooting tree at internal node # " . ($i+1) . "/" . $num_internals);
 
-			$node->set_root_below;
+			$node->set_root_below();
 
 			# store the tree for later
 			$rerooted_trees{$i} = $current_tree;
@@ -454,6 +446,7 @@ sub outgroup_root {
 	# fetch outgroup nodes and mrca
 	my %og = map{ $_=>1 } @all_ids;
 	my @ognodes = grep { exists($og{$_->get_name}) } @{$tree->get_terminals};
+
 	if ( ! scalar @ognodes ) {
 		my @specnames = map{$self->find_node($_)->taxon_name} @all_ids;
 		$log->warn("Cannot reroot at outgroup! None of the following names are in the tree: " . join(', ', @specnames));
@@ -617,7 +610,6 @@ sub make_mapping_table {
 
 	my $mts = Bio::SUPERSMART::Service::MarkersAndTaxaSelector->new;
 	my %mapping;
-
 	for my $t ( @{$tree->get_terminals} ) {
 		my $name = $t->get_name;
 		$self->logger->debug("remapping taxon name $name");

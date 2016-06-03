@@ -54,8 +54,7 @@ sub run {
 	my $outformat = $opt->outformat;	
 	
 	# parse tree(s)
-	my $forest = $ts->read_tree( '-file'=>$opt->treefile );
-	my @trees = $forest->isa('Bio::Phylo::Forest::Tree') ? ($forest) : @{$forest->get_entities};
+	my @trees = $ts->read_tree( '-file'=>$opt->treefile );
 
 	# remap	
 	$self->_remap($_) for @trees;
@@ -63,7 +62,7 @@ sub run {
 	# write to file
 	$ts->to_file( 
 		'-file'   => $opt->outfile, 
-		'-tree'   => $forest, 
+		'-tree'   => \@trees, 
 		'-format' => $outformat
 		);
 

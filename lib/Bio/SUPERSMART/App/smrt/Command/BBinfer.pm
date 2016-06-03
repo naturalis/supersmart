@@ -255,7 +255,7 @@ sub _set_usertree {
 	my $starttree;
 	if ( $treefile ) {
 		$log->info("Starting inference from tree $treefile");
-		$starttree = $ts->read_tree( '-file' => $treefile );
+		($starttree) = $ts->read_tree( '-file' => $treefile );
 		$starttree = $ts->remap_to_ti( $starttree );
 	}
 	else {

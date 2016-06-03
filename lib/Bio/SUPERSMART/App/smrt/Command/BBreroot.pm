@@ -127,15 +127,14 @@ sub run {
 	my @records = $mt->parse_taxa_file($taxafile);
 		
 	# iterate over trees
-	my $forest = $ts->read_tree( '-file' => $backbone );
-	my @trees = @{ $forest->get_entities };
-	
+	my @trees = $ts->read_tree( '-file' => $backbone );
+
 	# mapping tables for faster id and taxon name lookup
 	my %ti_to_name;
 	my %name_to_ti;
 
 	# reroot input trees in parallel
-	my @treestrs = pmap{	
+	my @rerooted_trees = pmap{	
 		my $tree = $_;
 		
 		# create id mapping table
@@ -180,15 +179,20 @@ sub run {
         $log->info("Rerooted backbone tree");
 		$tree->ultrametricize if $opt->ultrametricize;
 
-		## TODO when doing return($tree), the node order gets messed up again... Why?  
-		return ($tree->to_newick); 
+		## TODO when doing return($tree), the node order gets messed up again... Why???  
+		$log->debug($tree->to_newick);
+		return $tree->to_newick; 
 
 	} @trees;
 	
-	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@trees) != scalar(@treestrs);
+	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@trees) != scalar(@rerooted_trees);
+
+	# concatenate newick strings
+	my $str;
+	$str .= "$_\n" for @rerooted_trees;
 
 	# write output file
-	$ts->to_file( '-file' => $outfile, '-string' => join("\n", @treestrs) );
+	$ts->to_file( '-file' => $outfile, '-string' => $str );
 	
 	$log->info("DONE, results written to $outfile");		
 }
@@ -201,7 +205,7 @@ sub _get_smallest_outgroup {
 	my $logger = $self->logger;
 	
 	my $ts  = Bio::SUPERSMART::Service::TreeService->new;
-	my $tree = $ts->read_tree( '-file' => $treefile );	
+	(my $tree) = $ts->read_tree( '-file' => $treefile );	
 	$tree->resolve;
 
 	# get subtrees below root

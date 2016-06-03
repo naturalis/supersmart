@@ -54,8 +54,8 @@ sub run {
 	my $logger = $self->logger;      	
 	my $ts = Bio::SUPERSMART::Service::TreeService->new; 	
    
-	my $tree1 = $ts->read_tree( '-file'   => $opt->tree1 );
-	my $tree2 = $ts->read_tree( '-file'   => $opt->tree2 );
+	(my $tree1) = $ts->read_tree( '-file'   => $opt->tree1 );
+	(my $tree2) = $ts->read_tree( '-file'   => $opt->tree2 );
   
 	if ( $opt->prune ) {
 		# prune tips such that both trees have the same taxa.

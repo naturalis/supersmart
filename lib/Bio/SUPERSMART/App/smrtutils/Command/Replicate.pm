@@ -84,7 +84,7 @@ sub run {
 	my $mts    = Bio::SUPERSMART::Service::MarkersAndTaxaSelector->new;
 
 	# read tree
-	my $tree = $ts->read_tree( '-file' => $treefile );
+	(my $tree) = $ts->read_tree( '-file' => $treefile );
 	
 	# prune negative branches from tree, if any
 	$tree = $self->_prune_negative_branches($tree);
@@ -94,7 +94,7 @@ sub run {
 	if ( my $filename_rep = $opt->replicated_tree ) {
 		#load replicate tree from file
 		$logger->info("Reading replicated tree from $filename_rep");
-		$tree_replicated = $ts->read_tree( '-file'   => $filename_rep );
+		($tree_replicated) = $ts->read_tree( '-file'   => $filename_rep );
 	}
 	else {
 		$logger->info("Replicating tree from $treefile");
