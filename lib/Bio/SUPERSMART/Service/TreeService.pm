@@ -74,7 +74,7 @@ sub to_string {
 	my $forest = $fac->create_forest;
 	
 	# either one tree is provided or an arrayref of trees
-	if ( ref($tree) ) {
+	if ( ref($tree) eq 'ARRAY' ) {
 		$forest->insert($_) for @{$tree};
 	}
 	else {
