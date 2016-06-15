@@ -1,0 +1,31 @@
+#NEXUS
+
+BEGIN TAXA;
+[! Taxa block written by Bio::Phylo::Taxa 0.58 on Mon May 23 18:22:21 2016 ]
+	
+        DIMENSIONS NTAX=7;
+        TAXLABELS
+		Lynx_lynx
+		Lynx_rufus
+		Neofelis_nebulosa
+		Panthera_onca
+		Panthera_tigris
+		Pardofelis_marmorata
+		Uncia_uncia
+        ;
+END;
+BEGIN TREES;
+[! Trees block written by Bio::Phylo::Forest 0.58 on Mon May 23 18:22:21 2016 ]
+	TRANSLATE
+		1 Lynx_lynx,
+		2 Neofelis_nebulosa,
+		3 Panthera_onca,
+		4 Panthera_tigris,
+		5 Uncia_uncia,
+		6 Lynx_rufus,
+		7 Pardofelis_marmorata;
+	TREE TREE1 = [&R] (1[&length_95%_HPD={21.825168,25.0},length_median=24.979998,length_range={19.561498,25.0},height_95%_HPD={0.0,1.0000000010279564E-6},length=24.620448201478744,height_median=0.0,height=3.068391871315015E-7,height_range={0.0,1.999999998503199E-6}]:25.000000,(((3[&length=5.308476218114596,height_median=0.0,height_95%_HPD={0.0,1.0000000010279564E-6},height_range={0.0,1.00000000458067E-6},height=3.5120147909095433E-7,length_95%_HPD={1.168042,14.339346},length_range={1.168042,25.0},length_median=3.334696]:9.914615,(6[&length_range={0.902202,24.985506},length_median=2.514412,length_95%_HPD={1.207027,24.983747},height=3.123844736108366E-7,height_range={0.0,2.0000000020559128E-6},height_median=0.0,length=6.700413203327164,height_95%_HPD={0.0,1.0000000010279564E-6}]:7.358225,7[&length_95%_HPD={1.207703,25.0},length_range={0.902202,25.0},length_median=2.505817,height_95%_HPD={0.0,1.0000000010279564E-6},length=6.304590530499071,height_median=0.0,height=3.068391870986668E-7,height_range={0.0,2.0000000020559128E-6}]:7.358225)[&length_95%_HPD={0.459739,18.835914},length_median=1.389849,length_range={0.155517,20.738873},posterior=0.7264325323475046,length=3.41947209923664,height_median=1.9476760000000013,height_95%_HPD={0.9022019999999991,6.314920999999998},height_range={0.9022019999999991,9.071824},height=2.5364522340966924]:2.556390)[&posterior=0.3955637707948244,length_range={0.052035,16.530077},length_median=0.38569,length_95%_HPD={0.052035,4.339533},height=3.2134011401869156,height_range={1.6901200000000003,9.537408},length=0.9584782336448595,height_median=2.9519959999999994,height_95%_HPD={1.6901200000000003,6.773956000000002}]:1.048990,(4[&length_95%_HPD={0.912542,14.324088},length_median=3.38174,length_range={0.912542,25.0},height_95%_HPD={0.0,1.0000000010279564E-6},height_median=0.0,length=5.06375356007394,height_range={0.0,1.999999998503199E-6},height=3.2717190427712145E-7]:5.367422,5[&length_median=3.259369,length_range={0.912542,25.0},length_95%_HPD={0.912542,13.746456},height_range={0.0,1.999999998503199E-6},height=3.105360448259822E-7,length=4.853587841035118,height_median=0.0,height_95%_HPD={0.0,1.0000000010279564E-6}]:5.367422)[&length_range={0.040816,20.402399},length_median=1.047714,posterior=0.37707948243992606,length_95%_HPD={0.159462,10.698021},height_range={0.912543000000003,5.777259000000001},height=2.5716340049019606,height_median=2.3591935,length=2.487661034313724,height_95%_HPD={0.912543000000003,4.5380600000000015}]:5.596183)[&height_range={2.0098769999999995,6.611376},height=3.6779890915032696,length=15.557693127450982,height_median=3.563112500000001,height_95%_HPD={2.07057,5.230765999999999},length_median=18.718106,posterior=0.5656192236598891,length_range={5.193107,22.222857},length_95%_HPD={6.398637,22.11433}]:9.168477,2[&height_range={0.0,1.999999998503199E-6},height=3.0868761605426165E-7,height_median=0.0,length=16.66549310351202,height_95%_HPD={0.0,1.0000000010279564E-6},length_median=14.930377,length_range={3.982141,25.0},length_95%_HPD={5.662619,25.0}]:20.132082)[&height=9.599159771929829,height_range={4.554355000000001,15.182900000000004},length=15.400840561403504,height_median=9.996784000000002,height_95%_HPD={5.647657000000002,13.679961},length_median=15.003217,posterior=0.31608133086876156,length_range={9.8171,20.445646},length_95%_HPD={11.320039,19.352344}]:4.867918)[&length=0.0,height_median=25.0,fossil_name=F_1,height_95%_HPD={25.0,25.000001},height_range={25.0,25.000002},height=25.000000306839254,fossil_id=1,fossil_age={25,25},posterior=1.0];
+END;
+BEGIN NOTES;
+[! Notes block written by Bio::Phylo::Project 0.58 on Mon May 23 18:22:21 2016 ]
+END;
