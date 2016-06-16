@@ -50,7 +50,7 @@
                 "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA keyboard-configuration/variant=USA console-setup/ask_detect=false ",
                 "initrd=/install/initrd.gz -- <enter>"
             ],
-            "headless": false,
+            "headless": true,
             "boot_wait": "10s",
             "disk_size": 20480,
             "guest_os_type": "Ubuntu_64",
