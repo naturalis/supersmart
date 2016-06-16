@@ -38,7 +38,7 @@ if [ "$TAGVERSION" != "$APIVERSION" ]; then
 	git push --tags
 	git commit -m "Release v$TAGVERSION" $H/lib/Bio/SUPERSMART.pm $H/conf/template.json
 	git push
-	packer push template.json
+	packer build template.json
 else
 	echo "version unchanged: (tag) $TAGVERSION == (api) $APIVERSION"
 fi
