@@ -1,4 +1,8 @@
 language: perl
+
+sudo: required
+dist: trusty
+
 perl:
   - "5.16"
   #- "5.14"
