@@ -68,7 +68,7 @@ sub options {
 		],
 		[
     		 "outgroup_tree|p=s", 
-    		 "tree to extract outgroup from. Outgroup taxa are the terminals of the smallest subtree below the root  ",
+    		 "tree in newick format to extract outgroup from. Outgroup taxa are the terminals of the smallest subtree below the root  ",
     		 { arg => "file" }
 		],
 		[
@@ -123,19 +123,27 @@ sub run {
 	elsif ( my $treefile = $opt->outgroup_tree ) {
 		$outgroup = $self->_get_smallest_outgroup( $treefile );
 	}
+	
 	# prepare taxa data
 	my @records = $mt->parse_taxa_file($taxafile);
 		
 	# iterate over trees
-	my @trees = $ts->read_tree( '-file' => $backbone );
-
+	open my $in, '<', $backbone or die $!;
+	chomp(my @backbone_trees = <$in>);
+	close $in;
+	
 	# mapping tables for faster id and taxon name lookup
 	my %ti_to_name;
 	my %name_to_ti;
 
 	# reroot input trees in parallel
 	my @rerooted_trees = pmap{	
-		my $tree = $_;
+		my $treestr = $_;
+
+		# read tree
+		$log->debug("Reading tree from string");
+		my $tree = parse_tree( '-string' => $treestr, 
+							   '-format' => 'newick' );	
 		
 		# create id mapping table
 		if ( ! scalar(%ti_to_name) ) {
@@ -151,13 +159,13 @@ sub run {
 		# Perform rerooting at outgroup, if given		
 		if ( $outgroup ) {			
 			my @ranks = ('forma', 'varietas', 'subspecies', 'species');	
-			$log->debug('Rerooting at outgroup with id(s) ' . join(',', @{$outgroup}));
+			$log->debug("Rerooting at outgroup $outgroup");
 			$ts->outgroup_root(
 				'-tree'     => $tree,
 				'-ids'      => $outgroup,
 				'-ranks'    => \@ranks,
 				'-records'  => \@records,
-				);
+				);		
 		} 
 		
 		# Try to minimize paraphyly if no outgroup given
@@ -172,28 +180,25 @@ sub run {
 			$log->debug("smoothing out diff between left and right tip heights");
 			$ts->smooth_basal_split($tree);
 		}
-  
+		
 		# clean up labels and map to taxon names
-		$ts->remap($tree, %ti_to_name);
+		$tree = $ts->remap($tree, %ti_to_name);
 		$ts->remove_internal_names($tree);
         $log->info("Rerooted backbone tree");
+		
 		$tree->ultrametricize if $opt->ultrametricize;
 
-		## TODO when doing return($tree), the node order gets messed up again... Why???  
-		$log->debug($tree->to_newick);
-		return $tree->to_newick; 
+		return( $tree->to_newick )
 
-	} @trees;
+	} @backbone_trees;
 	
-	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@trees) != scalar(@rerooted_trees);
-
-	# concatenate newick strings
-	my $str;
-	$str .= "$_\n" for @rerooted_trees;
-
+	$log->warn("Number of rerooted trees different than number of input trees") if scalar(@backbone_trees) != scalar(@rerooted_trees);
+	
 	# write output file
-	$ts->to_file( '-file' => $outfile, '-string' => $str );
-	
+	open my $out, '>', $outfile or die $!;			
+	print $out $_  . "\n" for @rerooted_trees;
+	close $out;
+
 	$log->info("DONE, results written to $outfile");		
 }
 
@@ -204,8 +209,9 @@ sub _get_smallest_outgroup {
 	my ($self, $treefile) = @_;
 	my $logger = $self->logger;
 	
-	my $ts  = Bio::SUPERSMART::Service::TreeService->new;
-	(my $tree) = $ts->read_tree( '-file' => $treefile );	
+	# parse tree
+	my $tree = parse_tree( '-file' => $treefile, 
+						   '-format' => 'newick' );	
 	$tree->resolve;
 
 	# get subtrees below root
