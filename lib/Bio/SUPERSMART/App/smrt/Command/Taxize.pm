@@ -112,7 +112,13 @@ sub run {
 	}	
 	# expand root taxa if argument is provided
 	if ( $expand_rank or $root_taxa ) {
+		print "Expanding taxa";
 		@names = $mts->expand_taxa( \@names, $expand_rank || "species" );
+	}
+	
+	if ( ! scalar (@names)) {
+		$log->warn("Could not find any taxa for names list or root taxon in database. No output produced.");
+		return 1;
 	}
 	
 	my @taxa_table = $mts->make_taxa_table( '-taxon_names' => \@names, '-binomial' => $opt->binomials_only, 
