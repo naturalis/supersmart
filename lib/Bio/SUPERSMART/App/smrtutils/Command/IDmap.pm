@@ -6,6 +6,7 @@ use warnings;
 use Bio::Phylo::IO qw(parse parse_tree unparse);
 
 use Bio::SUPERSMART::Service::TreeService;
+use Bio::SUPERSMART::Service::MarkersAndTaxaSelector;
 use Bio::Phylo::Factory;
 use Bio::Phylo::Util::CONSTANT ':objecttypes';
 
@@ -36,6 +37,7 @@ sub options {
 		['treefile|t=s', "tree files", { arg => 'file' }],		
 		["outfile|o=s", "name of the output tree file (newick format) defaults to $outfile_default", { default=> $outfile_default, arg => "file"}],    	    
 		['outformat|f=s', "file format of output tree, defaults to $outformat_default. Supported formats: newick, nexus, figtree (nexus)", { default => $outformat_default, arg => "format" }],
+		['tnrs|s', "do taxonomic name resolution for taxon names in tree to yield a tree with SUPERSMART compatible names", {}],
 	    );	
 }
 
@@ -56,9 +58,15 @@ sub run {
 	# parse tree(s)
 	my @trees = $ts->read_tree( '-file'=>$opt->treefile );
 
-	# remap	
-	$self->_remap($_) for @trees;
-	
+	if ( $opt->tnrs ) {
+		# adjust to names in database
+		$self->_resolve_names($_) for @trees;
+	}
+	else {
+		# remap	
+		$self->_remap($_) for @trees;
+	}
+
 	# write to file
 	$ts->to_file( 
 		'-file'   => $opt->outfile, 
@@ -67,6 +75,53 @@ sub run {
 		);
 
 	$logger->info("DONE, tree written to " . $opt->outfile ); 
+}
+
+sub _resolve_names {
+	my ( $self, $tree ) = @_;
+	
+	my $mts = Bio::SUPERSMART::Service::MarkersAndTaxaSelector->new;
+	my $logger = $self->logger;      	
+	
+	# Traverse tree and check if names are in database or can be tnrs'ed.
+	# Change name accordingly.
+	# Keep names that could not be mapped.
+	my @unmapped;
+	$tree->visit(
+        sub {
+            my $node = shift;
+			if ( $node->is_terminal ) {
+				my $name = $node->get_name;
+				$logger->info("Trying to resolve name $name");
+				my @dbnodes = $mts->get_nodes_for_names( $name );
+
+				if ( ! scalar(@dbnodes) ) {
+					$logger->warn("Could not map name $name. Will remove tip from tree.");
+					push @unmapped, $name; 
+				}
+				else {
+					# Change name of node
+					my $newname = $dbnodes[0];
+					$node->set_name($newname);
+					if ( $newname eq $name ) {
+						$logger->info("Name $name exists in database.")
+					} 
+					else {
+						$logger->info("Changing node name from $name to $newname.")
+					}
+					$logger->warn("More than one node for $name found in database.") if scalar(@dbnodes) > 1;
+				}
+			}
+		}
+		);
+	
+	# Prune unmapped tips, if any
+	if ( my $cnt = scalar(@unmapped) ) {
+		$logger->info("Pruning $cnt unmapped tips from tree.");
+		$tree->prune_tips(\@unmapped);
+	}
+	
+	return $tree;
 }
 
 sub _remap {
