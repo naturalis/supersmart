@@ -91,7 +91,7 @@ sub _resolve_names {
         sub {
             my $node = shift;
 			if ( $node->is_terminal ) {
-				my $name = $node->get_name;
+				(my $name =  $node->get_name)  =~ s/_/ /g;
 				$logger->info("Trying to resolve name $name");
 				my @dbnodes = $mts->get_nodes_for_names( $name );
 
@@ -101,13 +101,13 @@ sub _resolve_names {
 				}
 				else {
 					# Change name of node
-					my $newname = $dbnodes[0];
+					my $newname = $dbnodes[0]->taxon_name;
 					$node->set_name($newname);
 					if ( $newname eq $name ) {
 						$logger->info("Name $name exists in database.")
 					} 
 					else {
-						$logger->info("Changing node name from $name to $newname.")
+						$logger->info("Changing tip name from $name to $newname.")
 					}
 					$logger->warn("More than one node for $name found in database.") if scalar(@dbnodes) > 1;
 				}
