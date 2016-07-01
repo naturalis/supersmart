@@ -10,6 +10,8 @@ use Bio::SUPERSMART::Service::MarkersAndTaxaSelector;
 use Bio::Phylo::Factory;
 use Bio::Phylo::Util::CONSTANT ':objecttypes';
 
+use Data::Dumper;
+
 use base 'Bio::SUPERSMART::App::SubCommand';
 use Bio::SUPERSMART::App::smrtutils qw(-command);
 
@@ -103,7 +105,6 @@ sub _resolve_names {
 				else {
 					# Change name of node
 					my $newname = $dbnodes[0]->taxon_name;
-					#my $rank = $dbnodes[0]->rank;
 
 					if ( $newname eq $name ) {
 						$logger->info("Name $name exists in database.");
@@ -125,13 +126,13 @@ sub _resolve_names {
 					$logger->warn("More than one node for $name found in database.") if scalar(@dbnodes) > 1;					
 				}
 			}
+			$logger->debug(Dumper(\@unmapped));
 		}
 		);
 	
 	# Prune unmapped tips, if any
 	if ( my $cnt = scalar(@unmapped) ) {
 		@unmapped = map{$mts->encode_taxon_name($_)} @unmapped;
-		print Dumper(\@unmapped);
 		$logger->info("Pruning $cnt unmapped tips from tree.");
 		$tree = $tree->prune_tips(\@unmapped);
 	}
