@@ -87,11 +87,12 @@ sub _resolve_names {
 	# Change name accordingly.
 	# Keep names that could not be mapped.
 	my @unmapped;
+	my %all_names = map {$_=>1} map {$mts->decode_taxon_name($_->get_name)} @{$tree->get_terminals};
 	$tree->visit(
         sub {
             my $node = shift;
 			if ( $node->is_terminal ) {
-				(my $name =  $node->get_name)  =~ s/_/ /g;
+				my $name =  $mts->decode_taxon_name($node->get_name);
 				$logger->info("Trying to resolve name $name");
 				my @dbnodes = $mts->get_nodes_for_names( $name );
 
@@ -102,14 +103,26 @@ sub _resolve_names {
 				else {
 					# Change name of node
 					my $newname = $dbnodes[0]->taxon_name;
-					$node->set_name($newname);
+					#my $rank = $dbnodes[0]->rank;
+
 					if ( $newname eq $name ) {
-						$logger->info("Name $name exists in database.")
-					} 
+						$logger->info("Name $name exists in database.");
+					}					
 					else {
-						$logger->info("Changing tip name from $name to $newname.")
+						if ( ! $all_names{$newname} ) {
+							$logger->info("Changing tip name from $name to $newname.");
+							$node->set_name($mts->encode_taxon_name($newname));
+							delete $all_names{$name};
+							$all_names{$newname} = 1;
+						}
+						else {
+							# It can be the case that a name is mapped to some name that is already in the tree
+							# In that case, the node must not be inserted.
+							$logger->warn("Cannot change tip name $name to $newname because $newname is already in the tree. Removing tip $name.");
+							push @unmapped, $name;
+						}
 					}
-					$logger->warn("More than one node for $name found in database.") if scalar(@dbnodes) > 1;
+					$logger->warn("More than one node for $name found in database.") if scalar(@dbnodes) > 1;					
 				}
 			}
 		}
@@ -117,8 +130,10 @@ sub _resolve_names {
 	
 	# Prune unmapped tips, if any
 	if ( my $cnt = scalar(@unmapped) ) {
+		@unmapped = map{$mts->encode_taxon_name($_)} @unmapped;
+		print Dumper(\@unmapped);
 		$logger->info("Pruning $cnt unmapped tips from tree.");
-		$tree->prune_tips(\@unmapped);
+		$tree = $tree->prune_tips(\@unmapped);
 	}
 	
 	return $tree;
