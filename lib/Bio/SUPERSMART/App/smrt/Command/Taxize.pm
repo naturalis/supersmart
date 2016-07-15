@@ -112,7 +112,6 @@ sub run {
 	}	
 	# expand root taxa if argument is provided
 	if ( $expand_rank or $root_taxa ) {
-		print "Expanding taxa";
 		@names = $mts->expand_taxa( \@names, $expand_rank || "species" );
 	}
 	
