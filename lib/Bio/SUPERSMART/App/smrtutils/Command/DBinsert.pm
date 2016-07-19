@@ -64,7 +64,7 @@ sub options {
 		['prefix|p=s', "prefix for generated sequence accessions, defaults to $prefix_default", {default => $prefix_default}],
 		['desc|d=s', "description for sequence(s)", {}],
 		['format|f=s', "format of input alignemnt files, default: $format_default", { default => $format_default }],
-		['generate_fasta|g', "generate FASTA files compatible with smrt commands. FASTA file names will have the suffix '-smrt-inserted'. An alignment list containing the new fasta files is created under the name 'aligned-smrt-inserted.txt'. This option is enabled by default.", {default => 1} ]
+		['generate_fasta|g', "generate FASTA files compatible with smrt commands. FASTA file names will have prefix <seed-gi> and the suffix '-smrt-inserted'. An alignment list containing the new fasta files is created under the name 'aligned-smrt-inserted.txt'. This option is enabled by default.", {default => 1} ]
 	    );	
 }
 
@@ -118,7 +118,8 @@ sub run {
 			my ($matrix) = @{ $project->get_items(_MATRIX_) };
 			
 			# iterate over sequences and insert into database
-			for my $seq ( @{$matrix->get_entities} ) {
+			my @seqs = @{$matrix->get_entities};
+			for my $seq ( @seqs ) {
 				my $gi = $self->_insert_seq($seq, $matrix, $opt->prefix, $opt->desc );				
 				push @inserted, $gi;
 			}
@@ -128,14 +129,15 @@ sub run {
 			if ( $opt->generate_fasta ) {
 				# prepend artificial 'seed-gi' to filename.
 				# This is needed by 'smrt orthologize', otherwise it won't find
-				# the sequences! As the seed gi, we take the last 
-				# inserted artificial gi:
-
-				#remove current file extension				
-				my $newfile = $file;
+				# the sequences! As the seed gi, we take the first gi that we can find
+				my $seed_gi = $inserted[0];
+				
+				# make filename for output file
+				my ($vol, $dirs, $newfile) = File::Spec->splitpath($file);
+				#remove current file extension
 				$newfile =~ s/\.[^\.]+$//;
-				$newfile .= '-smrt-inserted.fa';
-								
+				$newfile = "${seed_gi}-${newfile}-smrt-inserted.fa";
+				
 				$logger->info("Writing alignment to $newfile");
 				unparse ( -phylo => $matrix, -file => $newfile, -format=>'fasta' );
 
