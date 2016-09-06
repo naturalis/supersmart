@@ -36,7 +36,8 @@ sub options {
 	my $outformat_default = 'newick';
 	my $outfile_default = 'tree-remapped.dnd';
 	return (
-		['treefile|t=s', "tree files", { arg => 'file' }],		
+		['treefile|t=s', "tree files", { arg => 'file' }],	
+		['informat|i=s', "input format", { arg => 'format' }],			
 		["outfile|o=s", "name of the output tree file (newick format) defaults to $outfile_default", { default=> $outfile_default, arg => "file"}],    	    
 		['outformat|f=s', "file format of output tree, defaults to $outformat_default. Supported formats: newick, nexus, figtree (nexus)", { default => $outformat_default, arg => "format" }],
 		['tnrs|s', "do taxonomic name resolution for taxon names in tree to yield a tree with SUPERSMART compatible names", {}],
@@ -58,7 +59,9 @@ sub run {
 	my $outformat = $opt->outformat;	
 	
 	# parse tree(s)
-	my @trees = $ts->read_tree( '-file'=>$opt->treefile );
+	my %args  = $opt->informat ? ( '-format' => $opt->informat ) : ();
+	$args{'-file'} = $opt->treefile;
+	my @trees = $ts->read_tree( %args );
 
 	if ( $opt->tnrs ) {
 		# adjust to names in database
