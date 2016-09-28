@@ -156,10 +156,10 @@ sub run {
 		$tree = $ts->remap($tree, %name_to_ti);
 		$tree->resolve;
 
-		# Perform rerooting at outgroup, if given		
+		# Perform rerooting at outgroup, if given
 		if ( $outgroup ) {			
 			my @ranks = ('forma', 'varietas', 'subspecies', 'species');	
-			$log->debug("Rerooting at outgroup $outgroup");
+			$log->debug("Rerooting at outgroup ID(s) " . join(', ', @$outgroup));
 			$ts->outgroup_root(
 				'-tree'     => $tree,
 				'-ids'      => $outgroup,
