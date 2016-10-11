@@ -5,8 +5,8 @@
 FROM ubuntu:14.04
 
 # add scripts
-ADD default.pp .
-ADD intro.sh .
+COPY default.pp .
+COPY intro.sh .
 
 # install necessary packages
 RUN apt-get -y update && apt-get install -y puppet nano gzip
