@@ -164,6 +164,14 @@ Getter/setter for whether or not just a dry run should be performed
 
 *dryRun = *d;
 
+=item restart
+
+Getter/setter to restart from checkpoint (set previous run ID)
+
+=cut
+
+*restart = *r;
+
 ##sub program_name { $PROGRAM_NAME }
 
 =item program_dir

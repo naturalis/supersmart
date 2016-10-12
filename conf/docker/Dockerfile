@@ -2,12 +2,11 @@
 # on a virtual ubuntu host. Provisioning is done by puppet, using the
 # 'default.pp' manifest.
 
-# create from image containing phylota database
 FROM ubuntu:14.04
 
 # add scripts
-ADD default.pp /
-ADD intro.sh /
+COPY default.pp .
+COPY intro.sh .
 
 # install necessary packages
 RUN apt-get -y update && apt-get install -y puppet nano gzip

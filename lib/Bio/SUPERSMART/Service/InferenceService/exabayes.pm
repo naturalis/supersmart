@@ -21,12 +21,20 @@ be applied to the wrapper.
 =cut
 
 sub configure {
-    my ( $self ) = @_;
+    my ( $self, %args ) = @_;
     my $tool    = $self->wrapper;
     my $config  = $self->config;
     my $logger  = $self->logger;
     my $outfile = $self->outfile;
         
+	# set checkpoint ID from previous run, if given
+	if ( my $file = $args{'checkpoint'} ) {
+		$logger->info("Restarting from checkpoint file $file");
+		# extract previous run ID from checkpoint file named ExaBayes_checkpoint.RUNID
+		(my $checkpoint = $file) =~ s/ExaBayes_checkpoint\.//g;
+		$tool->restart($checkpoint);
+	}
+
     # set outfile name
     $logger->info("going to create output file $outfile");
     $tool->outfile_name($outfile);    

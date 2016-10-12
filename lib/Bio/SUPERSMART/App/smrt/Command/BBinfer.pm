@@ -99,6 +99,11 @@ sub options {
 		     "name of the output tree file (in newick format), defaults to '$outfile_default'", 
 		     {default => $outfile_default, arg => "file", galaxy_out => 1, galaxy_type => "data", galaxy_label => "backbone" }
 		],
+		[    
+			 "append|a=s",
+			 "[ExaBayes inference only] append output to previous run, need to specify ExaBayes checkpoint file (ExaBayes_checkpoint.infer_backbone_XXXX)",
+			 {}
+		],
         [    "cleanup|x", 
 			 "if set, cleans up all intermediate files", 
 			 {}
@@ -172,7 +177,7 @@ sub run {
 		# create replicate settings
 		$is->outfile( "${base}.${i}" );
 		$is->replicate( $i );
-		$is->configure;
+		$is->configure('checkpoint' => $opt->append);
 		
 		# run
 		my $backbone = $is->run( 'matrix' => $matrix );  
