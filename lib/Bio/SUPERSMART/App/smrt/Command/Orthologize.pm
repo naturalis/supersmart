@@ -24,8 +24,9 @@ Align.pm - assesses orthology in different sequence alignments and merges them i
 
 Given a list of aligned candidate clusters, assigns orthology among the
 clusters by performing reciprocal BLAST searches on the seed sequences
-around which the clusters were assembled. Produces a list of re-aligned
-superclusters.
+around which the clusters were assembled. Writes sequence clusters as FASTA files
+into a user-specified dirsctory ('./clusters/' by default). Also writes a file 'cluster-names.tsv'
+containing the definition lines of the first sequence of each cluster.
 
 =cut
 
@@ -80,7 +81,11 @@ sub run {
 	my @gis = $mt->extract_seed_gis( @alnfiles );
 
 	# merge alignments to orthologous clusters and store in output directory
-	$sg->merge_alignments( $config->BACKBONE_MAX_DISTANCE, $workdir, $indir, $outdir,  @gis );
+	my @clfiles = $sg->merge_alignments( $config->BACKBONE_MAX_DISTANCE, $workdir, $indir, $outdir,  @gis );
+	
+	# write a file with the cluster names (definitions) for each cluster
+	my $names_file = "cluster-names.tsv";
+	$sg->write_cluster_definitions( "$outdir/$names_file", @clfiles );
 
 	# cleanup working directory and zip output if required
 	$self->cleanup_inputdir( $opt->indir );

@@ -828,6 +828,25 @@ sub get_aligned_locus_indices {
 	return @indices;
 }
 
+=item get_name_for_gi
+
+Given a GI number, returns a list of the definitions (names)
+with which the sequence was annotated.
+
+=cut
+
+sub get_name_for_gi {
+	my ( $self, $gi ) = @_;
+	my $result;
+	if ( my $seq = $self->find_seq($gi) ) {
+		$result = $seq->get_name;
+	}
+	else {
+		$self->logger->warn("No sequence found for gi $gi");
+	}
+	return $result;
+}
+
 =item get_markers_for_gi
 
 Given a GI number, returns a comma-separated list of the short marker name(s)
@@ -1308,7 +1327,7 @@ sub merge_alignments {
 	my @clusters = $self->cluster_blast_results($report);
 
 	# merge and align
-	my @merged_files = pmap {
+	my @merged_files = grep {defined $_ and -e $_ } pmap {
 		my ($clref) = @_; 
 		my $id      = $clref->{'id'};
 		my @seed_gis     = @{ $clref->{'seq'} };
@@ -1318,8 +1337,44 @@ sub merge_alignments {
 		my @files = map { glob ( "$indir/" .  $_ . "*.fa" ) } @seed_gis;
 		# profile align files to merge as many as possible
 		$self->profile_align_all( $merged, $maxdist, @files );
-		return $merged;
-	} @clusters;	
+		return -e $merged ? $merged : undef;
+	} @clusters;
+	return @merged_files;
+}
+
+=item write_cluster_definitions
+
+Given a list of merged alignment files, writes the cluster file name respective cluster
+seqence definition to a file. From a cluster file, the sequence definition is extracted 
+from the first sequence in the cluster
+
+=cut
+
+sub write_cluster_definitions {
+	my ( $self, $outfile, @filenames ) = @_;
+
+	my @first_gis;
+	for my $f ( @filenames ) {
+		# get first defline 
+		open my $file, '<', $f or die "Could not open $f $!";
+		my $defline = <$file>;
+		close $file;
+		# extract GI
+		if ( $defline =~ />gi\|([0-9]+)\|.*/ ) {
+			my $gi = $1;
+			push @first_gis, $gi;
+		}
+	}
+	# get definitions (sequence names) for GIs
+	my @defs = map { $self->get_name_for_gi($_) } @first_gis;
+	
+	# write cluster file name and sequence definition to file
+	open my $out, '>', $outfile;
+	print $out "Filename\tGI\tdefinition\n";
+	for my $i ( 0 .. $#filenames ) {
+		print $out $filenames[$i] . "\t" . $first_gis[$i] . "\t" . $defs[$i] . "\n";
+	}
+	close $out;
 }
 
 sub _temp_fasta {
