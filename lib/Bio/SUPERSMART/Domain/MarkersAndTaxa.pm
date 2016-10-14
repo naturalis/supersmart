@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 use Bio::SUPERSMART::Service::MarkersAndTaxaSelector;
-use List::Util qw (min max);
+use List::Util qw (min max sum);
 use List::MoreUtils 'uniq';
 use Data::Dumper;
 use File::Spec;
@@ -149,7 +149,7 @@ sub _index_alignments {
     }
     $args->{'taxa_for_alns'} = \%taxa_for_alns;
     $args->{'alns_for_taxa'} = \%alns_for_taxa;
-    $log->debug("have ".scalar(keys(%alns_for_taxa))." alignments for ".scalar(keys(%taxa_for_alns))." taxa");
+    $log->debug("have ".scalar(keys(%taxa_for_alns))." alignments for ".scalar(keys(%alns_for_taxa))." taxa");
 
     # get adjacency matrix with taxa connected by markers
     my %adjacency_matrix = $mts->generate_marker_adjacency_matrix(
@@ -472,6 +472,20 @@ sub optimize_packing_order {
         }
     }
 
+	# one alignment must have at least two exemplar species, 
+	#  remove alignments from tfa and aft which have less
+	for my $aln ( keys %taxa_for_alns ) {
+		my @taxa = @{ $taxa_for_alns{$aln} };
+		if ( scalar (@taxa) < 2 ) {
+			delete $taxa_for_alns{$aln};
+			# delete alignments from aft
+			for my $tax ( @taxa ) {
+				my @alns_red = grep { ! ($_ eq $aln) } @{ $alns_for_taxa{$tax} };
+				$alns_for_taxa{$tax} = \@alns_red;								
+			}			
+		}
+	}
+	
     # sort alignments for each exemplar by decreasing taxon coverage
     for my $taxon ( @exemplars ) {
         if ( my $alns = $alns_for_taxa{$taxon} ) {
@@ -528,7 +542,13 @@ sub optimize_packing_order {
 			last ALN if not @alns;
         }
     }
-    my @sorted_alignments = sort keys %aln;
+	my @sorted_alignments = sort keys %aln;
+	
+	# Calculate density of Supersmatrix with respect to marker occurrence
+	my $nonzero = sum( values(%seen) );
+	my $dens = $nonzero / ( scalar(@sorted_exemplars) * scalar(@sorted_alignments) );
+	$log->info("Density of supermatrix : $dens");
+
     return \@sorted_exemplars, \@sorted_alignments;
 }
 
