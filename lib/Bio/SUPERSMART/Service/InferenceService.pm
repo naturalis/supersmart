@@ -194,6 +194,20 @@ sub usertree {
 	return $self->{'usertree'};
 }
 
+=item constraint_tree
+
+Getter/setter, is used to store the constraint tree
+
+=cut
+
+sub constraint_tree {
+	my ( $self, $tree ) = @_;
+	if ( $tree ) {
+		$self->{'constrainttree'} = $tree;
+	}
+	return $self->{'constrainttree'};
+}
+
 =back 
 
 =cut

@@ -58,11 +58,15 @@ sub configure {
     $tool->m($config->RAXML_MODEL);
     $tool->N($config->RAXML_RUNS);
     $tool->p($config->RANDOM_SEED);
-
+	
 	# set starting tree if given
-	if ( my $tree = $self->usertree and  ! $self->{'rapid_boot'} ) {
+	if ( my $tree = $self->usertree and  ! $self->{'rapid_boot'} and ! $self->constraint_tree ) {
 		$self->logger->info("Setting starting tree $tree");
 		$tool->t($tree);
+	}
+	if ( my $ct = $self->constraint_tree ) {
+		$self->logger->info("Setting constraint tree $ct");
+		$tool->g($ct);
 	}
 
 }

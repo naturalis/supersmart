@@ -886,6 +886,49 @@ sub make_random_starttree {
     return $tree;
 }
 
+=item make_constraint_tree
+
+Given a matrix file, creates a tree in 
+which all species are grouped together per genus. MRCAs for each genus
+branch off directly from the root in polytomies.
+The tree is written to the specified file name.
+
+=cut
+
+sub make_constraint_tree {
+	my ( $self, $matrixfile, $outfile) = @_;
+
+	# parse supermatrix and extract exemplar species ids
+	my @exemplars =  $self->read_tipnames($matrixfile);
+	
+	# group exemplar species by genus
+	my %grouped;
+	for my $ex ( @exemplars ) {
+		my $node = $self->find_node($ex);
+		my $genus = $node->get_genus();
+		push(@{$grouped{$genus}}, $ex);
+	}
+	
+	# build newick tree
+	my @elements;
+	for my $group ( values(%grouped) ) {
+		my @l = @$group;
+		
+		if ( scalar(@l) > 1 ) {
+			push @elements,  "(" . join(',', @l) . ")"; 
+		}
+		else {
+			push @elements, @l;
+		}
+	}
+	my $newick = '(' . join(',', @elements) .  ');';
+
+	# write to file
+	open my $fh, '>', $outfile or die $!;
+    print $fh $newick;
+    return $outfile;
+}
+
 =item make_ncbi_tree
 
 Given a taxa table, creates a tree with classifications according

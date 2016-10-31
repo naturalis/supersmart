@@ -64,6 +64,11 @@ sub options {
 		     { arg => "file", default => $taxa_default, galaxy_in => 1, galaxy_type => 'data', galaxy_format => 'tabular' }
 		],
 		[
+		     "constrain_genera|c",
+		     "[RAxML inference only] constrain genera to be monophyletic, won't work with --random start option",
+     		 { galaxy_in => 1, galaxy_type => 'boolean', galaxy_condition => { 'inferencetool' => ['ExaML'] } }
+		],
+		[
 		     "starttree|k=s", 
 			 "[ExaML inference only] starting tree for maximum-likelihood inference", 
 		     { galaxy_in => 1, galaxy_type => 'data', galaxy_condition => { 'inferencetool' => 'ExaML' } }
@@ -138,7 +143,7 @@ sub run {
     # collect command-line arguments
     my $supermatrix = $opt->supermatrix;
     my $bootstrap   = $opt->bootstrap;
-    	           
+	
     # instantiate and configure helper objects
     my $ts = Bio::SUPERSMART::Service::TreeService->new;     
     my $ss = Bio::SUPERSMART::Service::SequenceGetter->new;   
@@ -147,12 +152,18 @@ sub run {
         'workdir'   => $opt->workdir,
 		'bootstrap' => $opt->bootstrap
     );
-
+   
 	# need starting tree for examl inference
 	if ( $opt->inferencetool =~ /^examl$|^raxml$|^phyml$/i ) {
 		$self->_set_usertree( $is, $supermatrix, $opt->taxafile, $opt->random_start, $opt->starttree );
 	}
-
+	
+	# constrain genera to be monophyletic if specified by user
+	if ( $opt->constrain_genera and $opt->inferencetool eq 'raxml' ) {
+		my $cs = 'constraint.dnd';
+		$is->constraint_tree($ts->make_constraint_tree($supermatrix, $cs));
+	}
+	
 	# For RaXML's rapid bootstrap, do not create bootstrap matrices since it's taken care
 	#  of by RaXML
 	if ( $opt->rapid_boot ) {
