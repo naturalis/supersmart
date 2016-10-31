@@ -223,7 +223,7 @@ class install {
         
 	# install BEAST
 	"download_beast":
-	  command => "wget https://beast-mcmc.googlecode.com/files/BEASTv1.8.0.tgz",
+      command => "wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/beast-mcmc/BEASTv1.8.0.tgz",
 	  cwd     => $tools_dir,
 	  creates => "${tools_dir}/BEASTv1.8.0.tgz",
 	  require => Package[ 'wget' ];
