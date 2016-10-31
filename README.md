@@ -8,7 +8,7 @@ This is the source code repository of the Self-Updating Platform for the Estimat
 of Rates of Speciation, Migration, And Relationships of Taxa (SUPERSMART), a 
 pipeline for estimating time-calibrated species trees from public data. Constantly 
 updated information about the pipeline can be retrieved from the project website at 
-www.supersmart-project.org.
+www.supersmart-project.org. An article about SUPERSMART has been published in the journal (http://sysbio.oxfordjournals.org/content/early/2016/10/13/sysbio.syw066.abstract) [Systematic Biology].
 
 INSTALLATION
 ------------
