@@ -11,7 +11,7 @@ COPY intro.sh /
 RUN apt-get -y update && apt-get install -y puppet nano gzip wget
 
 # retrieve puppet manifest 
-RUN wget https://raw.githubusercontent.com/naturalis/supersmart/master/conf/manifests/default.pp
+RUN wget https://raw.githubusercontent.com/naturalis/supersmart/master/conf/manifests/default.pp -O /default.pp
 
 # set environment variables required by SUPERSMART
 ENV PERL5LIB "$PERL5LIB:/supersmart/lib/"
