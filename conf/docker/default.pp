@@ -240,10 +240,10 @@ class install {
     
 	# install beagle-lib
 	"checkout_beagle_lib":
-	  command => "svn checkout http://beagle-lib.googlecode.com/svn/trunk/ beagle-lib",
+	  command => "git clone --depth=1 https://github.com/beagle-dev/beagle-lib.git",
 	  cwd     => $tools_dir,
 	  creates => "${tools_dir}/beagle-lib/autogen.sh",
-	  require => Package[ 'subversion', "openjdk-6-jdk" ];
+	  require => Package[ 'git', 'openjdk-6-jdk', 'autoconf', 'automake', 'libtool', 'build-essential' ];
 	"generate_beagle_config":
 	  command => "sh autogen.sh",
 	  cwd     => "${tools_dir}/beagle-lib/",
