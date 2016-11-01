@@ -4,12 +4,14 @@
 
 FROM ubuntu:14.04
 
-# add scripts
-COPY default.pp /
+# add intro script
 COPY intro.sh /
 
 # install necessary packages
-RUN apt-get -y update && apt-get install -y puppet nano gzip
+RUN apt-get -y update && apt-get install -y puppet nano gzip wget
+
+# retrieve puppet manifest 
+wget https://raw.githubusercontent.com/naturalis/supersmart/master/conf/manifests/default.pp
 
 # set environment variables required by SUPERSMART
 ENV PERL5LIB "$PERL5LIB:/supersmart/lib/"
@@ -34,7 +36,7 @@ WORKDIR /shared
 RUN echo 'source /intro.sh' >> /root/.bashrc
 
 # provision virtual machine with SUPERSMART environment
-RUN puppet apply /default.pp 
+RUN puppet apply default.pp 
 
 # run unit tests 
 RUN cd $SUPERSMART_HOME && perl Makefile.PL && make test
