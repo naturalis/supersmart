@@ -439,6 +439,79 @@ sub pick_exemplars {
 	return @exemplars;
 }
 
+=item select_high_coverage_markers
+
+Choose the n markes (alignemnts) that cover the most species.
+If exemplar species are not part of at least BACKBONE_MIN_COVERAGE of
+these alignments, they get discarded
+
+=cut
+
+sub select_high_coverage_markers {
+    my ( $self, $nmarkers, @exemplars ) = @_;
+    # instantiate helper objects
+    my $log = $self->logger;
+    my $config = Bio::SUPERSMART::Config->new;
+
+    # dereference precomputed data
+    my %alns_for_taxa = %{ $self->alns_for_taxa };
+    my %taxa_for_alns = %{ $self->taxa_for_alns };
+
+    # reduce aft and tfa hashes to only include exemplars
+    my %ex = map { $_ => 1 } @exemplars; # quick lookup
+    for my $tax ( keys %alns_for_taxa ) {
+        delete $alns_for_taxa{$tax} unless $ex{$tax};
+    }
+    for my $aln ( keys %taxa_for_alns ) {
+        my @taxa = grep { $ex{$_} } @{ $taxa_for_alns{$aln} };
+        if ( scalar @taxa ) {
+            $taxa_for_alns{$aln} = \@taxa;
+        }
+        else {
+            delete $taxa_for_alns{$aln};
+        }
+    }
+
+	# one alignment must have at least two exemplar species, 
+	# remove alignments from tfa and aft which have less
+	for my $aln ( keys %taxa_for_alns ) {
+		my @taxa = @{ $taxa_for_alns{$aln} };
+		if ( scalar (@taxa) < 2 ) {
+			delete $taxa_for_alns{$aln};
+			# delete alignments from aft
+			for my $tax ( @taxa ) {
+				my @alns_red = grep { ! ($_ eq $aln) } @{ $alns_for_taxa{$tax} };
+				$alns_for_taxa{$tax} = \@alns_red;								
+			}			
+		}
+	}
+	
+	# count the number of taxa that are in each alignment, sort the alignments by taxon coverage
+	# and select the first $nmarkers alignments
+	my %num_taxa_for_alns = map { $_=>scalar(@{$taxa_for_alns{$_}}) } keys(%taxa_for_alns);
+	
+	my @sorted_alns = sort { $num_taxa_for_alns{$b} <=> $num_taxa_for_alns{$a} } keys %num_taxa_for_alns;
+	my $cutoff = min($nmarkers, scalar(@sorted_alns));
+	my @high_coverage_alns = @sorted_alns[0..$cutoff-1];
+	
+	# if an exemplar does not have at least BACKBONE_MIN_COVERAGE alns in 
+	# that are part of the high coverage alignments, it is discarded
+	my @pruned_exemplars;
+	for my $ex ( @exemplars ) {
+
+		my %alns = map { $_=>1 } @{$alns_for_taxa{$ex}};
+		my $coverage = scalar( grep { exists($alns{$_}) } @high_coverage_alns );
+		if ( $coverage < $self->min_cover ) {
+			$log->warn("Discarding exemplar $ex due to low coverage in the selected $nmarkers alignments");
+		}
+		else {
+			push @pruned_exemplars, $ex;
+		}		
+	}
+
+	return \@pruned_exemplars, \@high_coverage_alns;	
+}
+
 =item optimize_packing_order
 
 Given an array of exemplars, return an array reference of optimally sorted exemplars
