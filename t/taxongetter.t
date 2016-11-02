@@ -63,11 +63,6 @@ $log->info("read species names from $file");
 my @nodes = $mts->get_nodes_for_names(@names);
 ok( @nodes, "found nodes" );
 
-# try taxon Id for 'Acrocomia crispa'
-my ($n) = $mts->get_nodes_for_names('Acrocomia crispa');
-my $ti = $n->ti;
-ok ( $ti, 'found ti for Acrocomia crispa');
-
 # search for taxon that cannot be found anywhere
 my @no_nodes = $mts->get_nodes_for_names("xy");
 is ( scalar @no_nodes, 0, "nonsense query yields no taxon");
