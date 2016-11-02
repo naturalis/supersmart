@@ -68,13 +68,6 @@ my ($n) = $mts->get_nodes_for_names('Acrocomia crispa');
 my $ti = $n->ti;
 ok ( $ti, 'found ti for Acrocomia crispa');
 
-# test searching for taxon name that is not in database but 
-# could be found using the webservice
-my $taxon = "Alouatta fusca";
-my @fusca_nodes = $mts->get_nodes_for_names($taxon);
-# after TNRS searching webservice, Alouatta guariba should be found. 
-is ($fusca_nodes[0]->taxon_name, "Alouatta guariba", "found species Alouatta guariba");
-
 # search for taxon that cannot be found anywhere
 my @no_nodes = $mts->get_nodes_for_names("xy");
 is ( scalar @no_nodes, 0, "nonsense query yields no taxon");
