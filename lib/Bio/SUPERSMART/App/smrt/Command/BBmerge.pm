@@ -15,7 +15,7 @@ BBmerge.pm - creates supermatrix for genus-level backbone tree
 
 =head1 SYNOPSIS
 
-smrt bbmerge [-h ] [-v ] [-w <dir>] -a <file> -t <file> [-o <file>] 
+smrt bbmerge [-h ] [-v ] [-w <dir>] -a <file> -t <file> [-o <file>]  [-e <number>] [-h <number>]
 
 =head1 DESCRIPTION
 
@@ -114,6 +114,11 @@ sub options {
 			"number of exemplar species per genus, defaults to $exemplars_default, set to -1 to include all species",
             { default => $exemplars_default, galaxy_in => 1, galaxy_type => "integer", galaxy_value => $exemplars_default }
         ],
+		[
+		    "high_coverage_markers|c=s",
+		    "Select only the specified number of markers that cover the most species. Warning: Many species might be discarded.",
+		 { galaxy_in => 1, galaxy_type => "integer"}
+		],
         [
 		 "names|n",
 		 "print taxon names instead of identifiers in supermatrix",
@@ -159,9 +164,17 @@ sub run {
     my @exemplars = $mt->pick_exemplars( $taxafile, $include_taxa, $opt->exemplars );
     $log->info( "Identified " . scalar(@exemplars) . " exemplars" );
 
-    # optimize the order in which taxa and alignments are added to the supermatrix.
-    # this means starting at the least-sequenced taxon and the most speciose alignment
-    my ($sorted_exemplars,$sorted_alignments) = $mt->optimize_packing_order(@exemplars);        
+	# use specified marker selection procedure
+	my ($sorted_exemplars,$sorted_alignments);
+	if (my $hc = $opt->high_coverage_markers) {
+		# select number of markers according to cutoff
+		($sorted_exemplars,$sorted_alignments) = $mt->select_high_coverage_markers($hc, @exemplars);        
+	}
+	else {
+		# optimize the order in which taxa and alignments are added to the supermatrix.
+		# this means starting at the least-sequenced taxon and the most speciose alignment   
+		($sorted_exemplars,$sorted_alignments) = $mt->optimize_packing_order(@exemplars);        
+	}
     $log->info( "Using " . scalar(@$sorted_alignments) . " alignments for supermatrix" );
     $log->info( "Number of exemplars : " . scalar(@$sorted_exemplars) );
 
