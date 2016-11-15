@@ -508,7 +508,7 @@ sub select_high_coverage_markers {
 			push @pruned_exemplars, $ex;
 		}		
 	}
-
+	
 	return \@pruned_exemplars, \@high_coverage_alns;	
 }
 
