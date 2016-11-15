@@ -46,19 +46,16 @@ sub configure {
     my $config = $self->config;
 
 	# number of threads
-	if ( $config->NODES > $self->bootstrap ) {
+	if ( $config->NODES > $self->bootstrap or $self->{'rapid_boot'} ) {
 		$tool->T($config->NODES);
 	}
-	else {
-		$tool->T(4);
-	}
-	
+
 	my ($volume,$directories,$id) = File::Spec->splitpath( $self->outfile );
     $tool->outfile_name($id);
     $tool->m($config->RAXML_MODEL);
     $tool->N($config->RAXML_RUNS);
     $tool->p($config->RANDOM_SEED);
-	
+
 	# set starting tree if given
 	if ( my $tree = $self->usertree and  ! $self->{'rapid_boot'} and ! $self->constraint_tree ) {
 		$self->logger->info("Setting starting tree $tree");
@@ -93,7 +90,7 @@ sub run {
 
 		# Do ML search and boostrapping in one go
 		$t->f('a');
-		
+
         # bootstrap random seed
         $t->x($self->config->RANDOM_SEED);
 
@@ -102,8 +99,8 @@ sub run {
 
 		# set number of rapid boostrap replicates; override number of runs
 		$t->N($self->bootstrap);
-		
-		# tell RaXML to put branch lenghts on bootstrap trees	   
+
+		# tell RaXML to put branch lenghts on bootstrap trees
 		$t->k(1);
     }
     # run raxml, returns bioperl tree
