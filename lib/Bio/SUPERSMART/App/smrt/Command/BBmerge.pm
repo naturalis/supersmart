@@ -100,7 +100,7 @@ sub options {
             { default => $outformat_default, galaxy_in => 1, galaxy_type => "select", galaxy_options => \@formats, galaxy_value => $outformat_default }
         ],
         [
-            "include_taxa|c=s",
+            "include_taxa|g=s",
 			"one or multiple names of taxa present in 'taxafile' (e.g. species or genus names, separated by commata) whose representative species will be included in the output dataset, regardless of marker coverage and sequence divergence",
             { galaxy_in => 1, galaxy_type => "text" }
         ],
