@@ -125,9 +125,7 @@ function if ParallelService was called with 'pthreads' as its argument.
 =cut
 
 sub pmap_pthreads (&@) {
-	my @data :shared;
-	my $func :shared;
-	( $func, @data ) = @_;
+	my ( $func, @data ) = @_;
 	my $counter = 0;
 	my $size    = scalar @data;
 	my @threads;
