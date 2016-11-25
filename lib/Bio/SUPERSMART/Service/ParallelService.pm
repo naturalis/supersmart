@@ -59,7 +59,10 @@ sub import {
 	# no mode specified
 	if ( !$mode ) {
 		$logger->info("no parallelization mode specified");
-		eval { require threads };
+		eval { 
+			require threads; 
+			require threads::shared;
+		};
 		if ( $@ ) {
 			$mode = 'pfm';
 			$logger->info("no threading support, using fork manager");
@@ -122,7 +125,9 @@ function if ParallelService was called with 'pthreads' as its argument.
 =cut
 
 sub pmap_pthreads (&@) {
-	my ( $func, @data ) = @_;
+	my @data :shared;
+	my $func :shared;
+	( $func, @data ) = @_;
 	my $counter = 0;
 	my $size    = scalar @data;
 	my @threads;
@@ -134,25 +139,25 @@ sub pmap_pthreads (&@) {
 	for ( my $i = 0 ; $i < $size ; $i += $inc ) {
 		++$thread;
 		my $max = ( $i + $inc - 1 ) >= $size ? $size - 1 : $i + $inc - 1;
-		my @subset = @data[ $i .. $max ];
-		$logger->debug("Detaching " . scalar(@subset) . " items to thread # " . $thread );
+		#@data[ $i .. $max ];
+		$logger->debug("Detaching " . $max - $i . " items to thread # " . $thread );
 		eval {
 			push @threads, threads->create(
 				sub {
 					map {
-						$counter++;
-						$logger->debug(
-							"Thread $thread is processing item # $counter / "
-							. scalar(@subset) );
+						#$counter++;
+						#$logger->debug(
+						#	"Thread $thread is processing item # $counter / "
+						#	. scalar(@subset) );
 
 						# execute code block given in $func with argument
 						my $ret = $func->($_);
-						$logger->debug("Thread $thread finished processing item # $counter / "
-									  . scalar(@subset) );
-						$ret;
-					} @subset;
+						#$logger->debug("Thread $thread finished processing item # $counter / "
+						#			  . scalar(@subset) );
+						#$ret;
+					} @data[ $i .. $max ];
 				}
-				);
+			);
 		};
 		if ( $@ ) {
 			$logger->warn("Error in thread $thread");
