@@ -491,10 +491,14 @@ sub select_high_coverage_markers {
 	my %num_taxa_for_alns = map { $_=>scalar(@{$taxa_for_alns{$_}}) } keys(%taxa_for_alns);
 	
 	my @sorted_alns = sort { $num_taxa_for_alns{$b} <=> $num_taxa_for_alns{$a} } keys %num_taxa_for_alns;
+
+	
+
+
 	my $cutoff = min($nmarkers, scalar(@sorted_alns));
 	my @high_coverage_alns = @sorted_alns[0..$cutoff-1];
 	
-	# if an exemplar does not have at least BACKBONE_MIN_COVERAGE alns in 
+	# if an exemplar does not have at least BACKBONE_MIN_COVERAGE alns
 	# that are part of the high coverage alignments, it is discarded
 	my @pruned_exemplars;
 	for my $ex ( @exemplars ) {
@@ -588,24 +592,21 @@ sub optimize_packing_order {
         $seen{$taxon} = 0 if not defined $seen{$taxon};
 
         # add alignments until seen enough. XXX we may have a
-        # BACKBONE_MAX_COVERAGE so that all our exemplars have at least
+        # BACKBONE_MIN_COVERAGE so that all our exemplars have at least
         # a minimum which we, optionally, add to. Alternatively, we might
         # implement some sort of iterative expand() function that computes,
         # given the selected exemplars and alignments, which taxa are most
         # distant from each other in marker sharing, and try to select
         # markers that shorten that distance.
-        my $max = $config->BACKBONE_MAX_COVERAGE or $self->min_cover;
-      ALN: while ( $seen{$taxon} < $max ) {
+      ALN: while ( $seen{$taxon} < $self->min_cover ) {
 
-            # most speciose alignments first: we sorted aft already
+   		    # most speciose alignments first: we sorted aft already
             my $aln = shift @alns;
             if ( not $aln or not -e $aln ) {
-
-                # might happen, since we selected exemplars for which there
-                # are sufficient minimum alignments, but not necessarily
-                # BACKBONE_MAX_COVERAGE!
-                $log->info("No more alignments available for $taxon, now have: ".$seen{$taxon});
-                next TAXON;
+				
+				# This should not happen, since we selected only 
+				# exemplars for which there are sufficient alignments!
+				$log->fatal("No alignment available for exemplar $taxon");
             }
             $aln{$aln}++;
 
