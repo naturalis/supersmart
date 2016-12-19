@@ -58,7 +58,7 @@ sub run {
 	my $sum;
 	my $cnt;
 	for my $node ( @{$tree->get_internals} ) {
-		if ( my $posterior = $node->get_meta_object('fig:posterior') ) {
+		if ( my $posterior = $node->get_meta_object('fig:posterior') || $node->get_meta_object('fig:bootstrap')) {
 			$sum += $posterior;
 			$cnt++;
 		}
@@ -66,7 +66,7 @@ sub run {
 
 	if ( $cnt ) {
 		my $avg_post = sprintf("%.3f", $sum/$cnt);
-		$logger->info("Average posterior support value: $avg_post");
+		$logger->info("Average posterior or bootstrap value: $avg_post");
 	}
 
 	# get number of terminals
