@@ -37,4 +37,4 @@ RUN echo 'source /intro.sh' >> /root/.bashrc
 RUN puppet apply /default.pp 
 
 # run unit tests 
-# RUN cd $SUPERSMART_HOME && perl Makefile.PL && make test
+RUN cd $SUPERSMART_HOME && perl Makefile.PL && make test
