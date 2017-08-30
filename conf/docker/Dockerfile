@@ -19,9 +19,10 @@ ENV PATH "$PATH:/supersmart/tools/bin/"
 ENV SUPERSMART_HOME "/supersmart/"
 ENV EDITOR "nano"
 
-# this is needed by treePL on the virtual machine
+# this is needed by treePL and beagle to find the libs
 ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/usr/lib64"
-
+ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/usr/local/lib"
+	
 # other environment variables
 ENV SHELL "/bin/bash"
 
