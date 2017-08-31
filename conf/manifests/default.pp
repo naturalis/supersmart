@@ -163,7 +163,7 @@ class install {
 
 	# make phylota database
 	"dl_phylota_db":
-	  command => "wget https://github.com/hettling/phylota-sqlite/raw/master/phylota.sqlite.gz",
+	  command => "wget http://biovel.naturalis.nl/phylota.sqlite.gz",
 	  cwd     => $data_dir,
 	  creates => "${data_dir}/phylota.sqlite.gz",                        
 	  require => [ File[ $data_dir ], Package[ 'wget' ], Exec[ 'clone_supersmart' ] ];
