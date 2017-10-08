@@ -120,8 +120,12 @@ sub run {
 		return 1;
 	}
 	
-	my @taxa_table = $mts->make_taxa_table( '-taxon_names' => \@names, '-binomial' => $opt->binomials_only, 
-											'-all_ranks' => $opt->all_ranks, '-expand_rank' => lc($opt->expand_rank) );
+	my @taxa_table = $mts->make_taxa_table( 
+		'-taxon_names' => \@names, 
+		'-binomial'    => $opt->binomials_only, 
+		'-all_ranks'   => $opt->all_ranks, 
+		'-expand_rank' => lc($opt->expand_rank) 
+	);
 
 	if ( ! scalar (@taxa_table) ) {
 		my $msg = 'Taxa table does not contain any rows. ' .
